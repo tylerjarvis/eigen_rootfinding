@@ -1,8 +1,8 @@
 import numpy as np
 import os,sys
-from yroots.polynomial import MultiPower
+from eigen_rootfinding.polynomial import MultiPower
 import pytest
-from yroots import utils
+from eigen_rootfinding import utils
 
 
 def test_add():

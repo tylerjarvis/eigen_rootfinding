@@ -1,9 +1,9 @@
 import pytest
 import numpy as np
 import sympy as sy
-from yroots import utils as ut
-from yroots.utils import *
-from yroots.polynomial import MultiCheb, MultiPower
+from eigen_rootfinding import utils as ut
+from eigen_rootfinding.utils import *
+from eigen_rootfinding.polynomial import MultiCheb, MultiPower
 from scipy.linalg import qr, solve_triangular
 from itertools import product
 

@@ -1,10 +1,10 @@
 from timeit import default_timer as timer
 import numpy as np
 import pandas as pd
-from yroots.polyroots import solve
-from yroots.utils import ConditioningError
+from eigen_rootfinding.polyroots import solve
+from eigen_rootfinding.utils import ConditioningError
 from random_tests import load_tests
-from yroots.polynomial import MultiPower, MultiCheb
+from eigen_rootfinding.polynomial import MultiPower, MultiCheb
 
 def run_test(polys):
     try:

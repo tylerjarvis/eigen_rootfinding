@@ -30,7 +30,7 @@ setup(
     include_package_data=True,
     keywords='RootFinding',
     name='RootFinding',
-    packages=find_packages(include=['yroots']),
+    packages=find_packages(include=['eigen_rootifinding']),
     setup_requires=setup_requirements,
     test_suite='tests',
     tests_require=test_requirements,

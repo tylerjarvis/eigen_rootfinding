@@ -1,5 +1,5 @@
 import numpy as np
-from yroots.subdivision import solve
+from eigen_rootfinding.subdivision import solve
 from time import time
 from matplotlib import pyplot as plt
 # TODO Description of where these tests come from, links to relevant papers,

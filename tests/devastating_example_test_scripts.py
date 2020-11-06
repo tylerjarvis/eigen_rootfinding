@@ -2,16 +2,16 @@
 # matrix methods
 # Author: Hayden Ringer
 
-import yroots as yr
+import eigen_rootfinding as eig_rf
 import numpy as np
 from scipy.stats import ortho_group
-from yroots.polynomial import MultiPower, MultiCheb
-from yroots.Multiplication import ms_matrices, ms_matrices_cheb, ms_matrices_p, build_macaulay, multiplication
-from yroots.MacaulayReduce import reduce_macaulay_svd, reduce_macaulay_qrt, reduce_macaulay_tvb, reduce_macaulay_p
-from yroots.utils import ConditioningError
+from eigen_rootfinding.polynomial import MultiPower, MultiCheb
+from eigen_rootfinding.Multiplication import ms_matrices, ms_matrices_cheb, ms_matrices_p, build_macaulay, multiplication
+from eigen_rootfinding.MacaulayReduce import reduce_macaulay_svd, reduce_macaulay_qrt, reduce_macaulay_tvb, reduce_macaulay_p
+from eigen_rootfinding.utils import ConditioningError
 import scipy.linalg as la
 import matplotlib.pyplot as plt
-from yroots.subdivision import full_cheb_approximate, trim_coeffs
+from eigen_rootfinding.subdivision import full_cheb_approximate, trim_coeffs
 
 def condeig(A,eig,v):
     """Calculates the condition number of an eigenvalue of A"""

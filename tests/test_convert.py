@@ -1,6 +1,6 @@
 import numpy as np
 import os, sys
-from yroots.polynomial import MultiCheb, MultiPower, cheb2poly, poly2cheb
+from eigen_rootfinding.polynomial import MultiCheb, MultiPower, cheb2poly, poly2cheb
 import pytest
 import pdb
 import time

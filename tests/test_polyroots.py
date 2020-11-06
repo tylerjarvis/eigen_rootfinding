@@ -1,13 +1,12 @@
 import numpy as np
-from yroots.polynomial import Polynomial, MultiCheb, MultiPower, getPoly
-from yroots.MacaulayReduce import find_degree, mon_combos
-from yroots import polyroots as pr
-from yroots.utils import InstabilityWarning, arrays
-from yroots.Multiplication import create_matrix
+from eigen_rootfinding.polynomial import Polynomial, MultiCheb, MultiPower, getPoly
+from eigen_rootfinding.MacaulayReduce import find_degree, mon_combos
+from eigen_rootfinding import polyroots as pr
+from eigen_rootfinding.utils import InstabilityWarning, arrays
+from eigen_rootfinding.Multiplication import create_matrix
 from itertools import product
 import unittest
 import warnings
-import yroots.subdivision as sbd
 
 def test_paper_example():
 

@@ -1,6 +1,6 @@
 import numpy as np
-from yroots.polynomial import Polynomial, MultiCheb, MultiPower
-from yroots.OneDimension import solve
+from eigen_rootfinding.polynomial import Polynomial, MultiCheb, MultiPower
+from eigen_rootfinding.OneDimension import solve
 
 def getPoly(deg, power):
     '''
