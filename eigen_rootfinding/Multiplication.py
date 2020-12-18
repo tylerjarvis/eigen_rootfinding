@@ -205,17 +205,17 @@ def ms_matrices_cheb(E,Q,matrix_terms,dim):
     n = Q.shape[1]
     m = E.shape[0]
     M = np.empty((n,n,dim))
-    A = np.hstack((-E.T,Q.T))
+    A = np.hstack((-E.T.conj(), Q.T.conj()))
     for i in range(dim):
-        arr1,arr2 = indexarray_cheb(matrix_terms,m,i)
-        M[...,i] = .5*(A[:,arr1]+A[:,arr2])@Q
+        arr1, arr2 = indexarray_cheb(matrix_terms, m, i)
+        M[..., i] = .5*(A[:, arr1]+A[:,arr2])@Q
     return M
 
 def ms_matrices_p(E,P,matrix_terms,dim,cut):
     r,n = E.shape
     matrix_terms[cut:] = matrix_terms[cut:][P]
     M = np.empty((n,n,dim))
-    A = np.hstack((-E.T,np.eye(n)))
+    A = np.hstack((-E.T.conj(),np.eye(n)))
     for i in range(dim):
         arr = indexarray(matrix_terms,r,i)
         M[...,i] = A[:,arr]
@@ -245,7 +245,7 @@ def ms_matrices_p_cheb(E,P,matrix_terms,dim,cut):
     r,n = E.shape
     matrix_terms[cut:] = matrix_terms[cut:][P]
     M = np.empty((n,n,dim))
-    A = np.hstack((-E.T,np.eye(n)))
+    A = np.hstack((-E.T.conj(),np.eye(n)))
     for i in range(dim):
         arr1,arr2 = indexarray_cheb(matrix_terms,r,i)
         M[...,i] = .5*(A[:,arr1]+A[:,arr2])
