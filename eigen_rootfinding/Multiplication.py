@@ -9,6 +9,7 @@ from eigen_rootfinding.utils import row_swap_matrix, slice_top,\
                                     get_var_list, mon_combos, \
                                     mon_combosHighest, solve_linear, memoize
 from scipy.stats import ortho_group
+from eigen_rootfinding.utils import condeigs
 
 
 def multiplication(polys, max_cond_num, verbose=False, return_all_roots=True,
@@ -89,13 +90,13 @@ def multiplication(polys, max_cond_num, verbose=False, return_all_roots=True,
                 M = ms_matrices_p(E, Q, matrix_terms, dim, cut)
 
         # Compute the roots using eigenvalues of the Möller-Stetter matrices
-        roots = msroots(M)
+        roots, cond = msroots(M)
 
     if return_all_roots:
-        return roots
+        return roots, cond
     else:
         # only return roots in the unit complex hyperbox
-        return roots[[np.all(np.abs(root) <= 1) for root in roots]]
+        return roots[[np.all(np.abs(root) <= 1) for root in roots]], cond
 
 def indexarray(matrix_terms, m, var):
     """Compute the array mapping monomials under multiplication by x_var
@@ -333,6 +334,15 @@ def msroots(M):
     # Compute the matrix U that triangularizes a random linear combination
     U = schur((M*c).sum(axis=-1), output='complex')[1]
 
+    # Compute the eigenvalues of each matrix, and use the computed U to sort them
+    T = (U.conj().T)@(M[..., 0])@U
+    w, v = eig(M[..., 0])
+    arr = sort_eigs(w, np.diag(T))
+    eigs[0] = w[arr]
+
+    # Compute eigenvalue condition numbers (will be the same for all matrices)
+    cond = condeigs(M[..., 0], eigs[0], v[:, arr])
+    
     for i in range(0, dim):
         T = (U.conj().T)@(M[..., i])@U
         w = eig(M[..., i], right=False)
@@ -340,7 +350,7 @@ def msroots(M):
         eigs[i] = w[arr]
 
     # Rotate back before returning, transposing to match expected shape
-    return (Q.T@eigs).T
+    return (Q.T@eigs).T, cond
 
 
 def MSMultMatrix(polys, poly_type, max_cond_num, macaulay_zero_tol, verbose=False, MSmatrix=0):

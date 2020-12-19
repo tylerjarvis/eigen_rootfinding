@@ -82,6 +82,11 @@ if __name__ == "__main__":
         print('Sovling with TVB.')
         start = time.time()
 
+        # Record the test numbers that have entries in the dictionary.
+        TVB_results['test_num'].append(name)
+        SVD_results['test_num'].append(name)
+        QRT_results['test_num'].append(name)
+
         try:
             for _ in range(num_loops):
                 roots = eig_rf.solve(funcs, method='tvb')
@@ -137,11 +142,6 @@ if __name__ == "__main__":
             print("Conditioning Error with the Macaulay Matrix.")
             QRT_results['timings'].append(np.inf)
             QRT_results['residuals'].append(np.inf)
-
-        # Record the test numbers that have entries in the dictionary.
-        TVB_results['test_num'].append(name)
-        SVD_results['test_num'].append(name)
-        QRT_results['test_num'].append(name)
 
         with open(f'{dir}/QRT_results_{poly_type}.pkl', 'wb') as ofile:
             pickle.dump(QRT_results, ofile)
