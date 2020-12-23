@@ -28,22 +28,15 @@ The package can then by imported using `import eigen_rootfinding`.
 
 ```python
 #imports
-import numpy as np
 import eigen_rootfinding as eig_rf
 
-#define the functions -- must be smooth on the domain and vectorized
-f = lambda x,y : np.sin(x*y) + x*np.log(y+3) - x**2 + 1/(y-4)
-g = lambda x,y : np.cos(3*x*y) + np.exp(3*y/(x-2)) - x - 6
-
-#define a search domain
-a = np.array([-1,-2]) #lower bounds on x and y
-b = np.array([0,1]) #upper bounds on x and y
+# Define the polynomial system (this uses an example of random polynomials)
+f = eig_rf.polynomial.getPoly(5, 2, power=True)  # Degree 5, dimension 2 power polynomial
+g = eig_rf.polynomial.getPoly(7, 2, power=True)  # Degree 7, dimension 2 power polynomial
 
 #solve
-yr.solve([f,g],a,b)
+eig_rf.solve([f,g])
 ```
-
-<!-- If the system includes polynomials, there are specialized `Polynomial` objects which may be allow for faster solving. See the DemoNotebook.ipynb for details. -->
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
