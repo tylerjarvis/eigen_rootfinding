@@ -66,9 +66,9 @@ def solve(polys, MSmatrix=0, eigvals=True, verbose=False,
                 zeros = common
             return zeros
     else:
-        res = multiplication(polys, max_cond_num=max_cond_num, verbose=verbose,
+        res, cond = multiplication(polys, max_cond_num=max_cond_num, verbose=verbose,
                              return_all_roots=return_all_roots, method=method)
         if res[0] is None:
             raise ConditioningError(res[1])
         else:
-            return res
+            return res, cond
