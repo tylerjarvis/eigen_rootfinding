@@ -2,7 +2,7 @@ import numpy as np
 from eigen_rootfinding.polynomial import Polynomial, MultiCheb, MultiPower, getPoly
 from eigen_rootfinding.MacaulayReduce import find_degree, mon_combos
 from eigen_rootfinding import polyroots as pr
-from eigen_rootfinding.utils import InstabilityWarning, arrays
+from eigen_rootfinding.utils import ConditioningError, InstabilityWarning, arrays
 from eigen_rootfinding.Multiplication import create_matrix
 from itertools import product
 import pytest
@@ -395,7 +395,14 @@ def test_return_all_roots():
 
 def test_conditioning_error():
     '''Test if the conditioning error is raised properly.'''
+    
+    # This test uses a high degree Chebyshev polynomial interoplant
+    # of a smooth function used in the Chebfun2 Test Suite.
+    A = MultiCheb(np.load("tests/Chebfun_Poly_Coeff/MultiCheb/Test10_g.npy"))
+    B = MultiCheb(np.load("tests/Chebfun_Poly_Coeff/MultiCheb/Test10_f.npy"))
 
+    # Test that the conditioning error is raised properly
+    pytest.raises(ConditioningError, pr.solve, [A, B])
 
 if __name__ == "__main__":
     test_div_power_roots()
