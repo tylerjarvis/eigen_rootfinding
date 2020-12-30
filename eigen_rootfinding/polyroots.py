@@ -49,12 +49,9 @@ def solve(polys, MSmatrix=0, eigvals=True, verbose=False,
 
     # Determine polynomial type and dimension of the system
     if return_all_roots is None:
-        if not is_power(polys):
-            # If using Chebshev polynomials, then roots outside of the unit
-            # hypercube are not reliable.
-            return_all_roots = False
-        else:
-            return_all_roots = True
+        # If using Chebshev polynomials, then roots outside of the unit
+        # hypercube are not reliable.
+        return_all_roots = is_power(polys)
 
     dim = polys[0].dim
 
