@@ -12,7 +12,7 @@ from scipy.stats import ortho_group
 
 
 def multiplication(polys, max_cond_num, verbose=False, return_all_roots=True,
-                   method='svd'):
+                   method='svd', return_mult_matrices=False):
     '''
     Finds the roots of the given list of multidimensional polynomials using
     a multiplication matrix.
@@ -91,11 +91,12 @@ def multiplication(polys, max_cond_num, verbose=False, return_all_roots=True,
         # Compute the roots using eigenvalues of the Möller-Stetter matrices
         roots = msroots(M)
 
-    if return_all_roots:
-        return roots
+    if not return_all_roots:
+        roots = roots[[np.all(np.abs(root) <= 1) for root in roots]]
+    if return_mult_matrices:
+        return roots, M
     else:
-        # only return roots in the unit complex hyperbox
-        return roots[[np.all(np.abs(root) <= 1) for root in roots]]
+        return roots
 
 def indexarray(matrix_terms, m, var):
     """Compute the array mapping monomials under multiplication by x_var

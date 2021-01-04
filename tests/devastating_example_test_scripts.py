@@ -11,6 +11,7 @@ from eigen_rootfinding.MacaulayReduce import reduce_macaulay_svd, reduce_macaula
 from eigen_rootfinding.utils import ConditioningError
 import scipy.linalg as la
 import matplotlib.pyplot as plt
+from .random_tests import rand_coeffs
 
 def condeig(A,eig,v):
     """Calculates the condition number of an eigenvalue of A"""
@@ -222,7 +223,7 @@ def randmsmat(dim,eps,kind):
 def perturbpoly(dim,deg,basis,eps):
     if basis == 'power': MultiX = MultiPower
     else: MultiX = MultiCheb
-    coeff = eps*rand_coeffs(dim,deg,1)[0,0]
+    coeff = eps*rand_coeffs(dim,deg,1,'randn')[0,0]
     return MultiX(coeff)
 
 def perturb(polys,eps):
