@@ -505,16 +505,11 @@ def plot(datasets,labels=None,yaxislabel='Conditioning Ratio',subplots=None,titl
         if title is not None: plt.suptitle(title[-1])
         plt.tight_layout(rect=[0, 0.03, 1, 0.95])
         dims = 2+np.arange(np.max([len(data.keys()) for data in datasets[0]]))
-        if digits_lost:
-            max_y_lim = 9
-            ax[0].set_ylim(-1,max_y_lim)
-            ax[0].set_ylabel('Digits Lost')
-        else:
-            ax[0].set_ylabel('Conditioning Ratio')
-            ax[0].yaxis.set_major_formatter(mticker.StrMethodFormatter("$10^{{{x:.0f}}}$"))
-            if min_ylim is not None:
-                ax[0].yaxis.set_ticks([np.log10(x) for p in range(min_ylim,max_ylim)
-                                   for x in np.linspace(10**p, 10**(p+1), 10)], minor=True)
+        ax[0].set_ylabel('Conditioning Ratio')
+        ax[0].yaxis.set_major_formatter(mticker.StrMethodFormatter("$10^{{{x:.0f}}}$"))
+        if min_ylim is not None:
+            ax[0].yaxis.set_ticks([np.log10(x) for p in range(min_ylim,max_ylim)
+                               for x in np.linspace(10**p, 10**(p+1), 10)], minor=True)
         # insert slopes subplot stuff here ####################################################
         #######################################################################################
         if _2nd_plot is not None:
