@@ -3,10 +3,10 @@ Computes the conditioning ratios of random quadratics in dimensions
 2-10
 """
 from .devastating_example_test_scripts import *
-from yroots.utils import condeigs, newton_polish
-from yroots.polyroots import solve
-from yroots.Multiplication import *
-import yroots as yr
+from eigen_rootfinding.utils import condeigs, newton_polish
+from eigen_rootfinding.polyroots import solve
+from eigen_rootfinding.Multiplication import *
+import eigen_rootfinding as er
 import numpy as np
 from scipy import linalg as la
 from matplotlib import pyplot as plt
@@ -256,7 +256,7 @@ def get_conditioning_ratios(coeffs, newton, save=True):
         if newton: folder = 'conditioning_ratios_files/rand/newton/dim{}/'.format(dim)
         else:      folder = 'conditioning_ratios_files/rand/nopol/dim{}/'.format(dim)
     for i,system in enumerate(coeffs):
-        polys = [yr.MultiPower(c) for c in system]
+        polys = [er.MultiPower(c) for c in system]
         cr = conditioningratio(polys,dim,newton)
         if newton:
 
@@ -317,7 +317,7 @@ def get_MultiPower(center,roots):
     """
     creates a MultiPower object of a hyperellipse/hyperbola with a specified center and roots
     """
-    return yr.MultiPower(get_coeff(center,roots))
+    return er.MultiPower(get_coeff(center,roots))
 
 def gen_almost_multiple_roots(dim,seed,alpha,verbose=False):
     """
