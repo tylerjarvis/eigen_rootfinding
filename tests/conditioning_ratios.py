@@ -20,7 +20,7 @@ from matplotlib.ticker import FormatStrFormatter
 macheps = 2.220446049250313e-16
 
 def devestating_conditioning_ratios(dims,eps,kind,newton,N=50,just_dev_root=True,
-                                seed=468,perturb_eps=0,save=True,verbose=0,detailed=False):
+                                seed=468,delta=0,save=True,verbose=0,detailed=False):
     """Computes the conditioning ratios of a system of polynomails.
 
     Parameters
@@ -41,7 +41,7 @@ def devestating_conditioning_ratios(dims,eps,kind,newton,N=50,just_dev_root=True
         Otherwise, returns conditioning ratios for all roots.
     seed : int
         random seed to use in generating the systems
-    perturb_eps : float
+    delta : float
         the amount by which to perturb the system
     save : bool
         whether to save and return the results or just return them
@@ -76,8 +76,8 @@ def devestating_conditioning_ratios(dims,eps,kind,newton,N=50,just_dev_root=True
             #get a random devestating example
             polys = randpoly(dim,eps,kind)
             if verbose>2: print('System Coeffs',*[p.coeff for p in polys],sep='\n')
-            if perturb_eps > 0:
-                polys = perturb(polys,perturb_eps)
+            if delta > 0:
+                polys = perturb(polys,delta)
             conditioning_ratio = conditioningratio(polys,dim,newton,dev=just_dev_root,shifted=shifted,verbose=verbose>1,detailed=detailed)
             if newton:
                 if detailed:
@@ -319,31 +319,31 @@ def get_MultiPower(center,roots):
     """
     return yr.MultiPower(get_coeff(center,roots))
 
-def gen_almost_multiple_roots(dim,seed,delta,verbose=False):
+def gen_almost_multiple_roots(dim,seed,alpha,verbose=False):
     """
     Generates an n-dimensional hyperellipse/hyperbola with random seed 'seed.'
     The first root is *almost* multiplicity 'dim.' Specifically, the first root is chosen,
     and then dim-1 perturbations of that root are forced to also be roots. Those perturbations
-    are chosen using a normal distribution in each coordinate with mean 0 and standard deviation delta.
+    are chosen using a normal distribution in each coordinate with mean 0 and standard deviation alpha.
     """
     np.random.seed(seed)
     centers = np.random.randn(dim,dim)
     if verbose: print('Centers:',centers,sep='\n')
     root = np.random.randn(dim)
     if verbose: print('Root:',root,sep='\n')
-    dirs = np.random.randn(dim,dim)*delta
+    dirs = np.random.randn(dim,dim)*alpha
     dirs[0] = 0
     if verbose: print('Directions:',dirs,sep='\n')
     roots = root+dirs
     if verbose: print('Roots:',roots,sep='\n')
     return roots,[get_MultiPower(c,roots) for c in centers]
 
-def gen_almost_double_roots(dim,seed,delta,verbose=False):
+def gen_almost_double_roots(dim,seed,alpha,verbose=False):
     """
     Generates an n-dimensional hyperellipse/hyperbola with random seed 'seed.'
     The first root is *almost* a double root. Specifically, the first root is chosen,
     and then a perturbation of that root is forced to also be a root. The perturbation
-    is chosen using a normal distribution in each coordinate with mean 0 and standard deviation delta.
+    is chosen using a normal distribution in each coordinate with mean 0 and standard deviation alpha.
     There are also dim-2 other randomly pre-chosen chosen real roots. To see what they are, usee verbose=True.
     """
     np.random.seed(seed)
@@ -351,7 +351,7 @@ def gen_almost_double_roots(dim,seed,delta,verbose=False):
     if verbose: print('Centers:',centers,sep='\n')
     root = np.random.randn(1,dim)
     if verbose: print('Root:',root,sep='\n')
-    direction = np.random.randn(1,dim)*delta
+    direction = np.random.randn(1,dim)*alpha
     if verbose: print('Perturbation:',direction,sep='\n')
     root2 = root+direction
     if verbose: print('Almost Double Root:',root2,sep='\n')
@@ -364,7 +364,7 @@ def gen_almost_double_roots(dim,seed,delta,verbose=False):
     if verbose: print('Total Roots:',roots,sep='\n')
     return roots,[get_MultiPower(c,roots) for c in centers]
 
-def gen_rand_hyperconic(dim,seed,delta,verbose=False):
+def gen_rand_hyperconic(dim,seed,alpha,verbose=False):
     """
     Generates an n-dimensional hyperellipse/hyperbola with random seed 'seed.'
     There are dim randomly pre-chosen real roots. To see what they are, usee verbose=True.
@@ -376,9 +376,9 @@ def gen_rand_hyperconic(dim,seed,delta,verbose=False):
     if verbose: print('Roots:',roots,sep='\n')
     return roots,[get_MultiPower(c,roots) for c in centers]
 
-def get_data(delta,gen_func,seeds = {2:range(300),3:range(300),4:range(300)},detailed=False):
+def get_data(alpha,gen_func,seeds = {2:range(300),3:range(300),4:range(300)},detailed=False):
     """
-    Computes the conditioning ratio of the first generated root of systems generated with gen_func(dim,seed,delta) for each
+    Computes the conditioning ratio of the first generated root of systems generated with gen_func(dim,seed,alpha) for each
     seed in the seeds dictionary.
     Seeds is assumed to be a dictionary where the keys are the dimensions you want to test in, and the values
     are an iterable of random seeds to generate random systems with.
@@ -390,7 +390,7 @@ def get_data(delta,gen_func,seeds = {2:range(300),3:range(300),4:range(300)},det
     for dim in dims:
         print(dim)
         for n in seeds[dim]:
-            roots,polys = gen_func(dim=dim,seed=n,delta=delta)
+            roots,polys = gen_func(dim=dim,seed=n,alpha=alpha)
             cr = conditioningratio(polys,dim,newton=False,root=roots[0],detailed=detailed)
             if detailed:
                 cr, eig_cond, root_cond = cr
@@ -520,7 +520,7 @@ def plot(datasets,labels=None,yaxislabel='Conditioning Ratio',subplots=None,titl
         if _2nd_plot is not None:
             ax[1].clear()
             ax[1].semilogy(_2nd_plot[0], _2nd_plot[1])
-            ax[1].set_xlabel(r'Standard Deviation of Perturbation, $\delta$')
+            ax[1].set_xlabel(r'Standard Deviation of Perturbation, $\alpha$')
             ax[1].set_ylabel('Growth Rate, $r$')
             ax[1].set_title(title[1])
             ax[1].set_xscale('log')
@@ -528,7 +528,7 @@ def plot(datasets,labels=None,yaxislabel='Conditioning Ratio',subplots=None,titl
                                for x in np.linspace(10**p, 10**(p+1), 10)],minor=True)
             ax[1].xaxis.set_ticks([10**p for p in range(-6,0)],minor=False)
             plt.tight_layout(rect=[0, 0.03, 1, 0.95])
-    plt.savefig(fname='figures/'filename+'.pdf',bbox_inches='tight',dpi=dpi,format='pdf')
+    plt.savefig(fname='figures/'+filename+'.pdf',bbox_inches='tight',dpi=dpi,format='pdf')
     plt.show()
 
 if __name__ == "__main__":
