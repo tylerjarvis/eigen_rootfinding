@@ -6,8 +6,8 @@ import eigen_rootfinding as eig_rf
 import numpy as np
 from scipy.stats import ortho_group
 from eigen_rootfinding.polynomial import MultiPower, MultiCheb
-from eigen_rootfinding.Multiplication import ms_matrices, ms_matrices_cheb, ms_matrices_p, build_macaulay, multiplication
-from eigen_rootfinding.MacaulayReduce import reduce_macaulay_svd, reduce_macaulay_qrt, reduce_macaulay_tvb, reduce_macaulay_p
+from eigen_rootfinding.Multiplication import ms_matrices, ms_matrices_cheb, build_macaulay, multiplication
+from eigen_rootfinding.MacaulayReduce import reduce_macaulay_svd, reduce_macaulay_qrt
 from eigen_rootfinding.utils import ConditioningError
 import scipy.linalg as la
 import matplotlib.pyplot as plt
@@ -156,23 +156,19 @@ def redmacaulaypolys(polys,method,P=None):
 
 def msmatqeps(Q,eps,kind,method,P=None):
     E,Q2,matrix_terms,cut = redmacaulayqeps(Q,eps,kind,method,P)
-    if method == 'qrt':
+    if method == 'qrt' or method == 'svd':
         if kind in ['power','spower']:
             return ms_matrices(E,Q2,matrix_terms,Q.shape[0])
         else:
             return ms_matrices_cheb(E,Q2,matrix_terms,Q.shape[0])
-    else:
-        return ms_matrices_p(E,Q2,matrix_terms,Q.shape[0],cut)
 
 def msmatpolys(polys,method,P=None):
     E,Q2,matrix_terms,cut = redmacaulaypolys(polys,method,P)
-    if method == 'qrt':
+    if method == 'qrt' or method == 'svd':
         if isinstance(polys[0],MultiPower):
             return ms_matrices(E,Q2,matrix_terms,len(polys))
         else:
             return ms_matrices_cheb(E,Q2,matrix_terms,len(polys))
-    else:
-        return ms_matrices_p(E,Q2,matrix_terms,len(polys),cut)
 
 def mseigqeps(Q,eps,var,kind,method,P=None):
     m = msmatqeps(Q,eps,kind,method,P)[...,var]

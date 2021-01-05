@@ -73,4 +73,5 @@ def solve(polys, MSmatrix=0, eigvals=True, verbose=False,
         if res[0] is None:
             raise ConditioningError(res[1])
         else:
-            return res
+            if return_mult_matrices: return res[1:]
+            else: return res[1]
