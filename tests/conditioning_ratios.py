@@ -110,7 +110,7 @@ def devastating_conditioning_ratios(dims,eps,kind,newton,N=50,just_dev_root=True
     else: return crs
 
 def find_root_idx(roots,root):
-    dists = [mp.norm(root_curr - root) for root_curr in roots]
+    dists = [mp.norm(roots[root_num,:].T - root) for root_num in range(roots.rows)]
     return np.argmin(dists)
 
 def conditioningratio(polys,dim,newton,dev=False,shifted=None,root=None,verbose=False,detailed=False):
@@ -156,7 +156,7 @@ def conditioningratio(polys,dim,newton,dev=False,shifted=None,root=None,verbose=
             vals, vecR = mp.eig(M_)
             eig_conds_curr = condeigs(M_,vals,vecR)
             arr = sort_eigs(vals,roots[:,d],arr=True)
-            eig_conds.append([eig_conds_curr[k] for k in arr][idx])
+            eig_conds.append([eig_conds_curr[int(k)] for k in arr][idx])
         #compute the condition numbers of the roots
         J = mp.matrix(dim)
         for j,poly in enumerate(polys):
@@ -185,7 +185,7 @@ def conditioningratio(polys,dim,newton,dev=False,shifted=None,root=None,verbose=
             eig_conds[d] = condeigs(M_,vals,vecR)
             arr = sort_eigs(vals,roots[:,d],arr=True)
             vals = vals[arr]
-            eig_conds.append([eig_conds_curr[k] for k in arr])
+            eig_conds.append([eig_conds_curr[int(k)] for k in arr])
         #compute the condition numbers of the roots
         root_conds = []
         for i,root in enumerate(roots):
@@ -224,7 +224,7 @@ def conditioningratio(polys,dim,newton,dev=False,shifted=None,root=None,verbose=
             vals, vecR = mp.eig(M_)
             eig_conds_curr = condeigs(M_,vals,vecR)
             arr = sort_eigs(vals,roots[:,d],arr=True)
-            eig_conds.append([eig_conds_curr[k] for k in arr][idx])
+            eig_conds.append([eig_conds_curr[int(k)] for k in arr][idx])
         #compute the condition numbers of the roots
         J = mp.matrix(dim)
         for j,poly in enumerate(polys):
@@ -407,7 +407,7 @@ def get_data(alpha,gen_func,seeds = {2:range(300),3:range(300),4:range(300)},det
         print(dim)
         for n in seeds[dim]:
             roots,polys = gen_func(dim=dim,seed=n,alpha=alpha)
-            cr = conditioningratio(polys,dim,newton=False,root=roots[0],detailed=detailed)
+            cr = conditioningratio(polys,dim,newton=False,root=mp.matrix(roots[0]),detailed=detailed)
             if detailed:
                 cr, eig_cond, root_cond = cr
                 root_conds[dim].append(root_cond)
