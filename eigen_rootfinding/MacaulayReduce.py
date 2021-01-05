@@ -164,10 +164,10 @@ def reduce_macaulay_svd(M, cut, bezout_bound, max_cond=1e6):
     # If the matrix is "tall", compute an orthogonal transformation of the remaining
     # columns, generating a new polynomial basis
     if cut < M.rows:
-        Q = mp.svd(M[cut:,cut:])[2].H
+        Q = mp.svd(M[cut:,cut:],full_matrices=True)[2].H
         M[:cut,cut:] = M[:cut,cut:] * Q # Apply column transform
 
     # Return the backsolved columns and coefficient matrix for the quotient basis
-    return solve_triangular(M[:cut,:cut],M[:cut,bezout_rank:]),Q[:,Q.cols-bezout_bound:]
+    return mp_solve_triangular(M[:cut,:cut],M[:cut,bezout_rank:]),Q[:,Q.cols-bezout_bound:]
 
 #can't use QRP because mpmath can't do qr with pivoting

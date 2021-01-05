@@ -1446,4 +1446,4 @@ def householder(x):
     u[0] += mp.sign(z)*mp.norm(x)
     u = u/mp.norm(u)
     assert (u*u.H).rows > 1
-    return mp.eye(len(u)) - 2*u*u.H)
+    return mp.eye(len(u)) - 2*u*u.H
