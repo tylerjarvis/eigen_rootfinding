@@ -1396,14 +1396,32 @@ class Tolerances:
             return True
 
 ### Eigenvalue/vector conditioning ###
-def mp_solve_triangular(a,b,lower=False,overwrite_b=False):
-    soln = mp.matrix(b.rows,b.cols)
-    for row in range(soln.rows)[::-1]:
-        for col in range(soln.cols):
-            sum = mp.fsum([a[row,k]*soln[k,col] for k in range(row,soln.rows)])
-            soln[row,col] = b[row,col] - sum
-            soln[row,col] /= a[row,row]
-    return soln
+def mp_solve_triangular(a,b,lower=False,overwrite_b=False,trans=0):
+    if lower:
+        if trans == 0 or trans == 'N':
+            return mp_solve_triangular(a.T,b,lower=False,overwrite_b=False,trans=1)
+        if trans == 1 or trans == 'T':
+            return mp_solve_triangular(a,b,lower=False,overwrite_b=False,trans=0)
+        if trans == 2 or trans == 'C':
+            return mp_solve_triangular(a.T.conj(),b,lower=False,overwrite_b=False,trans=0)
+    elif trans == 0 or trans == 'N':
+        soln = mp.matrix(b.rows,b.cols)
+        for row in range(soln.rows)[::-1]:
+            for col in range(soln.cols):
+                sum = mp.fsum([a[row,k]*soln[k,col] for k in range(row,soln.rows)])
+                soln[row,col] = b[row,col] - sum
+                soln[row,col] /= a[row,row]
+        return soln
+    elif trans == 1 or trans == 'T':
+        soln = mp.matrix(b.rows,b.cols)
+        for row in range(soln.rows):
+            for col in range(soln.cols):
+                sum = mp.fsum([a[row,k]*soln[k,col] for k in range(row)])
+                soln[row,col] = b[row,col] - sum
+                soln[row,col] /= a[row,row]
+        return soln
+    elif trans == 2 or trans == 'C':
+        return mp_solve_triangular(a.H,b,lower=True)
 
 def condeig(A,eig,x,condvec=False):
     """Estimates the condition number of an eigenvalue of A. Optionally
@@ -1413,7 +1431,7 @@ def condeig(A,eig,x,condvec=False):
     Q = householder(x)
     B = (Q.H)*A*Q
     R = mp.qr(B[1:,1:]-eig*mp.eye(n-1))[1]
-    v = mp_solve_triangular(R.H,-B[0,1:],trans=2)
+    v = mp_solve_triangular(R,-B[0,1:],trans=2) #todo
     if condvec:
         S = mp.svd(R,compute_uv=False)
         return mp.sqrt(1+mp.norm(v)**2),1/(S[S.rows-1])
@@ -1423,7 +1441,7 @@ def condeig(A,eig,x,condvec=False):
 def condeigs(A,w,v,condvec=False):
     """Estimates the condition numbers of the eigenvalues of A. Optionally
     estimates the condition numbers of the eigenvectors."""
-    n = A.shape[0]
+    n = A.rows
 
     if condvec: cond = mp.matrix(n,2)
     else: cond = mp.matrix(n,1)
@@ -1443,7 +1461,7 @@ def householder(x):
     column of (Q^H)AQ is a multiple of e_1, whenever x is an eigenvector of A.
     """
     u = x.copy()
-    u[0] += mp.sign(z)*mp.norm(x)
+    u[0] += mp.sign(x[0])*mp.norm(x)
     u = u/mp.norm(u)
     assert (u*u.H).rows > 1
     return mp.eye(len(u)) - 2*u*u.H
