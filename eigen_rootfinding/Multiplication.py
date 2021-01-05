@@ -283,12 +283,12 @@ def msroots(M):
     eigs = mp.matrix(dim, M[0].rows)
     # Compute the matrix U that triangularizes a random linear combination
     M = sum([Myj*cj for Myj, cj in zip(My,c)])
-    U = mp.schur(M)[1]
+    U = mp.schur(M)[0]
 
     for j in range(0, dim):
         T = (U.H)*(My[j])*U
         w = mp.eig(My[j], right=False)
-        sorted_eigs = sort_eigs(w, mp.matrix([T[_,_] for _ in range(T.rows)]))
+        sorted_eigs = sort_eigs(w, [T[_,_] for _ in range(T.rows)])
         for k,eig in enumerate(sorted_eigs):
             eigs[j,k] = eig
 
