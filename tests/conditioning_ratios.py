@@ -109,6 +109,10 @@ def devastating_conditioning_ratios(dims,eps,kind,newton,N=50,just_dev_root=True
     if detailed: return crs, ecs, rcs
     else: return crs
 
+def find_root_idx(roots,root):
+    dists = [mp.norm(root_curr - root) for root_curr in roots]
+    return np.argmin(dists)
+
 def conditioningratio(polys,dim,newton,dev=False,shifted=None,root=None,verbose=False,detailed=False):
     """Computes the conditioning ratios of a system of polynomails.
 
@@ -144,53 +148,62 @@ def conditioningratio(polys,dim,newton,dev=False,shifted=None,root=None,verbose=
     #find the conditioning ratios for all the roots
     if root is not None:
         #find the root
-        idx = np.argmin(la.norm(roots-root,axis=1))
+        idx = find_root_idx(roots,root)
         #compute eigenvalue condition numbers
-        eig_conds = np.empty(dim)
+        eig_conds = []
         for d in range(dim):
-            M_ = M[...,d]
-            vals, vecR = la.eig(M_)
+            M_ = M[d]
+            vals, vecR = mp.eig(M_)
             eig_conds_curr = condeigs(M_,vals,vecR)
-            arr = sort_eigs(vals,roots[:,d])
-            vals = vals[arr]
-            eig_conds[d] = eig_conds_curr[arr][idx]
+            arr = sort_eigs(vals,roots[:,d],arr=True)
+            eig_conds.append([eig_conds_curr[k] for k in arr][idx])
         #compute the condition numbers of the roots
-        J = np.empty((dim,dim),dtype='complex')
+        J = mp.matrix(dim)
         for j,poly in enumerate(polys):
-            J[j] = poly.grad(root)
-        S = la.svd(J,compute_uv=False)
-        root_cond = 1/S[-1]
+            grad = poly.grad(root)
+            for k in range(dim):
+                J[j,k] = grad[k]
+        S = mp.svd(J,compute_uv=False)
+        root_cond = 1/S[S.rows-1]
         #compute the conditioning ratios
-        ratios = eig_conds / root_cond
+        ratios = [eig_cond/root_cond for eig_cond in eig_conds]
+        #truncate results into numpy arrays
+        ratios = np.array(ratios,dtype=np.float64)
         if detailed:
+            eig_conds = np.array(eig_conds,dtype=np.float64)
+            root_cond = np.array(root_cond,dtype=np.float64)
             if newton: return ratios, max_diff, smallest_dist_between_roots, eig_conds, root_cond
             else: return ratios, eig_conds, root_cond
         else:
             if newton: return ratios, max_diff, smallest_dist_between_roots
             else: return ratios
     elif not dev:
-        eig_conds = np.empty((dim,len(roots)))
+        eig_conds = []#np.empty((dim,len(roots)))
         for d in range(dim):
-            M_ = M[...,d]
-            #TODO think about that more carefully... polish numerator too or can we just use the polished roots?
-            vals, vecR = la.eig(M_)
+            M_ = M[d]
+            vals, vecR = mp.eig(M_)
             eig_conds[d] = condeigs(M_,vals,vecR)
-            arr = sort_eigs(vals,roots[:,d])
+            arr = sort_eigs(vals,roots[:,d],arr=True)
             vals = vals[arr]
-            eig_conds[d] = eig_conds[d][arr]
-        ratios = np.empty(len(roots))
+            eig_conds.append([eig_conds_curr[k] for k in arr])
         #compute the condition numbers of the roots
-        root_conds = np.empty(len(roots))
+        root_conds = []
         for i,root in enumerate(roots):
-            J = np.empty((dim,dim),dtype='complex')
             for j,poly in enumerate(polys):
-                J[j] = poly.grad(root)
-            S = la.svd(J,compute_uv=False)
-            root_cond = 1/S[-1]
+                grad = poly.grad(root)
+                for k in range(dim):
+                    J[j,k] = grad[k]
+            S = mp.svd(J,compute_uv=False)
+            root_cond = 1/S[S.rows-1]
             root_conds[i] = root_cond
         #compute the conditioning ratios
-        ratios = eig_conds / root_conds
+        ratios = [[eig_cond/root_cond for eig_cond in eig_conds_curr]
+                    for eig_conds_curr, root_cond in zip(eig_conds,root_conds)]
+        #truncate the results into numpy array
+        ratios = np.array(ratios,dtype=np.float64)
         if detailed:
+            eig_conds = np.array(eig_conds,dtype=np.float64)
+            root_conds = np.array(root_conds,dtype=np.float64)
             if newton: return ratios, max_diff, smallest_dist_between_roots, eig_conds, root_conds
             else: return ratios, eig_conds, root_conds
         else:
@@ -200,29 +213,33 @@ def conditioningratio(polys,dim,newton,dev=False,shifted=None,root=None,verbose=
     else:
         #find the root at the origin
         if shifted:
-            dev_root = np.ones(dim)
+            dev_root = mp.ones(1,dim)
         else:
-            dev_root = np.zeros(dim)
-        idx = np.argmin(la.norm(roots-dev_root,axis=1))
-
-        eig_conds = np.empty(dim)
+            dev_root = mp.zeros(1,dim)
+        idx = find_root_idx(roots,root)
+        #compute eigenvalue condition numbers
+        eig_conds = []
         for d in range(dim):
-            M_ = M[...,d]
-            vals, vecR = la.eig(M_)
+            M_ = M[d]
+            vals, vecR = mp.eig(M_)
             eig_conds_curr = condeigs(M_,vals,vecR)
-            arr = sort_eigs(vals,roots[:,d])
-            vals = vals[arr]
-            eig_conds[d] = eig_conds_curr[arr][idx]
-        ratios = np.empty(len(roots))
+            arr = sort_eigs(vals,roots[:,d],arr=True)
+            eig_conds.append([eig_conds_curr[k] for k in arr][idx])
         #compute the condition numbers of the roots
-        J = np.empty((dim,dim),dtype='complex')
+        J = mp.matrix(dim)
         for j,poly in enumerate(polys):
-            J[j] = poly.grad(roots[idx])
-        S = la.svd(J,compute_uv=False)
-        root_cond = 1/S[-1]
+            grad = poly.grad(root)
+            for k in range(dim):
+                J[j,k] = grad[k]
+        S = mp.svd(J,compute_uv=False)
+        root_cond = 1/S[S.rows-1]
         #compute the conditioning ratios
-        ratios = eig_conds / root_cond
+        ratios = [eig_cond/root_cond for eig_cond in eig_conds]
+        #truncate results into numpy arrays
+        ratios = np.array(ratios,dtype=np.float64)
         if detailed:
+            eig_conds = np.array(eig_conds,dtype=np.float64)
+            root_cond = np.array(root_cond,dtype=np.float64)
             if newton: return ratios, max_diff, smallest_dist_between_roots, eig_conds, root_cond
             else: return ratios, eig_conds, root_cond
         else:

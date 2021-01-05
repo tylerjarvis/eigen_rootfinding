@@ -206,7 +206,7 @@ def ms_matrices_cheb(E, Q, matrix_terms, dim):
         M.append(.5*(A_up + A_down)*Q)
     return M
 
-def sort_eigs(eigs, diag):
+def sort_eigs(eigs, diag, arr=False):
     """Sorts the eigs array to match the order on the diagonal
     of the Schur factorization
 
@@ -222,14 +222,25 @@ def sort_eigs(eigs, diag):
     w : 1d ndarray
         Eigenvalues from eigs sorted to match the order in diag
     """
-    n = len(diag)
-    lst = list(range(n))
-    sorted_eigs = [0]*n
-    for eig in eigs:
-        dists = [mp.fabs(eig - diag[l]) for l in lst]
-        nearest = lst.pop(np.argmin(dists))
-        sorted_eigs[nearest] = eig
-    return sorted_eigs
+    if arr:
+        n = len(diag)
+        lst = list(range(n))
+        sorted_eigs = [0]*n
+        arr = []
+        for eig in eigs:
+            dists = [mp.fabs(eig - diag[l]) for l in lst]
+            nearest = lst.pop(np.argmin(dists))
+            arr.append(nearest)
+        return np.argsort(arr)
+    else:
+        n = len(diag)
+        lst = list(range(n))
+        sorted_eigs = [0]*n
+        for eig in eigs:
+            dists = [mp.fabs(eig - diag[l]) for l in lst]
+            nearest = lst.pop(np.argmin(dists))
+            sorted_eigs[nearest] = eig
+        return sorted_eigs
 
 @memoize
 def get_Q_c(dim):

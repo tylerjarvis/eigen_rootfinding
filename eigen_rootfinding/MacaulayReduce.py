@@ -4,7 +4,7 @@ import itertools
 from eigen_rootfinding.polynomial import Polynomial, MultiCheb, MultiPower
 from eigen_rootfinding.utils import row_swap_matrix, MacaulayError, slice_top, mon_combos, \
                               num_mons_full, memoized_all_permutations, mons_ordered, \
-                              all_permutations_cheb, ConditioningError, TooManyRoots
+                              all_permutations_cheb, ConditioningError, TooManyRoots, mp_solve_triangular
 from matplotlib import pyplot as plt
 from warnings import warn
 
@@ -64,15 +64,6 @@ def find_degree(poly_list, verbose=False):
     if verbose:
         print('Degree of Macaulay Matrix:', sum(poly.degree for poly in poly_list) - len(poly_list) + 1)
     return sum(poly.degree for poly in poly_list) - len(poly_list) + 1
-
-def mp_solve_triangular(a,b,lower=False,overwrite_b=False):
-    soln = mp.matrix(b.rows,b.cols)
-    for row in range(soln.rows)[::-1]:
-        for col in range(soln.cols):
-            sum = mp.fsum([a[row,k]*soln[k,col] for k in range(row,soln.rows)])
-            soln[row,col] = b[row,col] - sum
-            soln[row,col] /= a[row,row]
-    return soln
 
 def compute_rank(M):
     S = mp.svd(M, compute_uv=False)

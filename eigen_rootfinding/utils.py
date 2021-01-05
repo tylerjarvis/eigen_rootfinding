@@ -3,6 +3,7 @@ import numpy as np
 import itertools
 from scipy.linalg import qr, solve_triangular, svd, norm, lu
 from scipy.special import comb
+import mpmath as mp
 
 class InstabilityWarning(Warning):
     pass
@@ -1395,30 +1396,44 @@ class Tolerances:
             return True
 
 ### Eigenvalue/vector conditioning ###
+def mp_solve_triangular(a,b,lower=False,overwrite_b=False):
+    soln = mp.matrix(b.rows,b.cols)
+    for row in range(soln.rows)[::-1]:
+        for col in range(soln.cols):
+            sum = mp.fsum([a[row,k]*soln[k,col] for k in range(row,soln.rows)])
+            soln[row,col] = b[row,col] - sum
+            soln[row,col] /= a[row,row]
+    return soln
+
 def condeig(A,eig,x,condvec=False):
     """Estimates the condition number of an eigenvalue of A. Optionally
     estimates the condition number of the eigenvector.
     """
-    n = A.shape[0]
+    n = A.rows
     Q = householder(x)
-    B = ((Q.conj().T)@A@Q)
-    R = qr(B[1:,1:]-eig*np.eye(n-1),mode='r')[0]
-    v = solve_triangular(R,-B[0,1:],trans=2)
+    B = (Q.H)*A*Q
+    R = mp.qr(B[1:,1:]-eig*mp.eye(n-1))[1]
+    v = mp_solve_triangular(R.H,-B[0,1:],trans=2)
     if condvec:
-        return (1+norm(v)**2)**.5,1/(svd(R,compute_uv=False)[-1])
+        S = mp.svd(R,compute_uv=False)
+        return mp.sqrt(1+mp.norm(v)**2),1/(S[S.rows-1])
     else:
-        return (1+norm(v)**2)**.5
+        return mp.sqrt(1+mp.norm(v)**2)
 
 def condeigs(A,w,v,condvec=False):
     """Estimates the condition numbers of the eigenvalues of A. Optionally
     estimates the condition numbers of the eigenvectors."""
     n = A.shape[0]
 
-    if condvec: cond = np.empty((n,2))
-    else: cond = np.empty(n)
+    if condvec: cond = mp.matrix(n,2)
+    else: cond = mp.matrix(n,1)
 
     for i in range(n):
-        cond[i] = condeig(A,w[i],v[:,i],condvec)
+        res = condeig(A,w[i],v[:,i],condvec)
+        if condvec:
+            cond[i,0],cond[i,1] = res[0],res[1]
+        else:
+            cond[i] = res
 
     if condvec: return cond[:,0],cond[:,1]
     else: return cond
@@ -1427,7 +1442,8 @@ def householder(x):
     """Given a vector x, computes a Householder reflector Q such that the first
     column of (Q^H)AQ is a multiple of e_1, whenever x is an eigenvector of A.
     """
-    u = x.copy().astype('complex')
-    u[0] += np.exp(1j*np.angle(x[0]))*norm(x)
-    u = u/norm(u)
-    return np.eye(len(u)) - 2*np.outer(u,u.conj())
+    u = x.copy()
+    u[0] += mp.sign(z)*mp.norm(x)
+    u = u/mp.norm(u)
+    assert (u*u.H).rows > 1
+    return mp.eye(len(u)) - 2*u*u.H)
