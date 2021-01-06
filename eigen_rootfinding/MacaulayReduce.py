@@ -98,12 +98,12 @@ def reduce_macaulay_qrt(M, cut, bezout_bound, max_cond=1e6):
     M = mp.matrix(M)
 
     # Check if numerical rank doesn't match bezout bound
-    rank = compute_rank(M)
+    # rank = compute_rank(M)
     bezout_rank = M.cols-bezout_bound
-    if rank < bezout_rank:
-        warn("Rank of Macaulay Matrix does not match the Bezout bound. Expected rank {}, found rank {}. System potentially has infinitely many solutions.".format(bezout_rank,rank))
-    elif rank > bezout_rank:
-        warn('Rank of Macaulay Matrix does not match the Bezout bound. Expected rank {}, found rank {}.'.format(bezout_rank,rank))
+    # if rank < bezout_rank:
+    #     warn("Rank of Macaulay Matrix does not match the Bezout bound. Expected rank {}, found rank {}. System potentially has infinitely many solutions.".format(bezout_rank,rank))
+    # elif rank > bezout_rank:
+    #     warn('Rank of Macaulay Matrix does not match the Bezout bound. Expected rank {}, found rank {}.'.format(bezout_rank,rank))
 
     # QR reduce the highest-degree columns
     Q,M[:,:cut] = mp.qr(M[:,:cut])
@@ -148,12 +148,12 @@ def reduce_macaulay_svd(M, cut, bezout_bound, max_cond=1e6):
     M = mp.matrix(M)
 
     # Check if numerical rank doesn't match bezout bound
-    rank = compute_rank(M)
+    # rank = compute_rank(M)
     bezout_rank = M.cols-bezout_bound
-    if rank < bezout_rank:
-        warn("Rank of Macaulay Matrix does not match the Bezout bound. Expected rank {}, found rank {}. System potentially has infinitely many solutions.".format(bezout_rank,rank))
-    elif rank > bezout_rank:
-        warn('Rank of Macaulay Matrix does not match the Bezout bound. Expected rank {}, found rank {}.'.format(bezout_rank,rank))
+    # if rank < bezout_rank:
+    #     warn("Rank of Macaulay Matrix does not match the Bezout bound. Expected rank {}, found rank {}. System potentially has infinitely many solutions.".format(bezout_rank,rank))
+    # elif rank > bezout_rank:
+    #     warn('Rank of Macaulay Matrix does not match the Bezout bound. Expected rank {}, found rank {}.'.format(bezout_rank,rank))
 
     # QR reduce the highest-degree columns
     Q,M[:,:cut] = mp.qr(M[:,:cut])

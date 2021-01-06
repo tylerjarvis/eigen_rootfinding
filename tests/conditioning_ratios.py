@@ -2,11 +2,11 @@
 Computes the conditioning ratios of random quadratics in dimensions
 2-10
 """
-from .devastating_example_test_scripts import *
+from devastating_example_test_scripts import *
+import eigen_rootfinding as er
 from eigen_rootfinding.utils import condeigs, newton_polish
 from eigen_rootfinding.polyroots import solve
 from eigen_rootfinding.Multiplication import *
-import eigen_rootfinding as er
 import numpy as np
 from scipy import linalg as la
 from matplotlib import pyplot as plt
@@ -65,8 +65,8 @@ def devastating_conditioning_ratios(dims,eps,kind,newton,N=50,just_dev_root=True
     else: shifted = True
     for n,dim in zip(N,dims):
         if save:
-            if newton: folder = 'conditioning_ratios_files/dev/newton/dim{}/'.format(dim)
-            else:      folder = 'conditioning_ratios_files/dev/nopol/dim{}/'.format(dim)
+            if newton: folder = 'conditioning_ratios/dev/newton/dim{}/'.format(dim)
+            else:      folder = 'conditioning_ratios/dev/nopol/dim{}/'.format(dim)
         if verbose>0:print('Dimension', dim)
         cr = []
         if detailed:
@@ -270,8 +270,8 @@ def get_conditioning_ratios(coeffs, newton, save=True):
     not_full_roots = np.zeros(N,dtype=bool)
     crs = [0]*N
     if save:
-        if newton: folder = 'conditioning_ratios_files/rand/newton/dim{}/'.format(dim)
-        else:      folder = 'conditioning_ratios_files/rand/nopol/dim{}/'.format(dim)
+        if newton: folder = 'conditioning_ratios/rand/newton/dim{}/'.format(dim)
+        else:      folder = 'conditioning_ratios/rand/nopol/dim{}/'.format(dim)
     for i,system in enumerate(coeffs):
         polys = [er.MultiPower(c) for c in system]
         cr = conditioningratio(polys,dim,newton)
@@ -392,7 +392,7 @@ def gen_rand_hyperconic(dim,seed,alpha,verbose=False):
     if verbose: print('Roots:',roots,sep='\n')
     return roots,[get_MultiPower(c,roots) for c in centers]
 
-def get_data(alpha,gen_func,seeds = {2:range(300),3:range(300),4:range(300)},detailed=False):
+def get_data(alpha,gen_func,seeds = {2:range(300),3:range(300),4:range(300)},detailed=False,save=False,filename=None,filenameextension=''):
     """
     Computes the conditioning ratio of the first generated root of systems generated with gen_func(dim,seed,alpha) for each
     seed in the seeds dictionary.
@@ -403,9 +403,20 @@ def get_data(alpha,gen_func,seeds = {2:range(300),3:range(300),4:range(300)},det
     data = {d:[] for d in dims}
     root_conds = {d:[] for d in dims}
     eig_conds = {d:[] for d in dims}
+    if save:
+        if gen_func.__name__ == 'gen_almost_double_roots':
+            test_type = 'doub'
+        elif gen_func.__name__ == 'gen_almost_multiple_roots':
+            test_type = 'mult'
+        elif gen_func.__name__ == 'gen_rand_hyperconic':
+            test_type = 'rand'
+        foldername = 'conditioning_ratios/nearby_roots/'+test_type+'/'
+        if filename is None:
+            filename = 'alpha{}'.format(str(alpha).replace(".", "_"))
     for dim in dims:
-        print(dim)
+        print('dim',dim)
         for n in seeds[dim]:
+            print('seed',n)
             roots,polys = gen_func(dim=dim,seed=n,alpha=alpha)
             cr = conditioningratio(polys,dim,newton=False,root=mp.matrix(roots[0]),detailed=detailed)
             if detailed:
@@ -413,15 +424,38 @@ def get_data(alpha,gen_func,seeds = {2:range(300),3:range(300),4:range(300)},det
                 root_conds[dim].append(root_cond)
                 eig_conds[dim].append(eig_cond)
             data[dim].extend(cr)
+            if save:
+                if dim > 4:
+                    print('saving...')
+                    dim_seed_marker = '_{}D_seed{}'.format(dim,n)
+                    np.save(foldername+filename+dim_seed_marker+filenameextension, np.float64(cr))
+                    if detailed:
+                        np.save(foldername+filename+dim_seed_marker+filenameextension+'_eigcond', np.float64(eig_cond))
+                        np.save(foldername+filename+dim_seed_marker+filenameextension+'_rootcond', np.float64(root_cond))
         data[dim] = np.array(data[dim]).flatten()
         if detailed:
             root_conds[dim] = np.array(root_conds[dim]).flatten()
             eig_conds[dim] = np.array(eig_conds[dim]).flatten()
+        if save:
+            if dim < 4:
+                print('saving...')
+                dim_marker = '_{}D'.format(dim)
+                np.save(foldername+filename+dim_marker+filenameextension, data)
+                if detailed:
+                    np.save(foldername+filename+dim_marker+filenameextension+'_eigconds', eig_conds)
+                    np.save(foldername+filename+dim_marker+filenameextension+'_rootconds', root_conds)
+    if save:
+        print('saving...')
+        np.save(foldername+filename+filenameextension, data)
+        if detailed:
+            np.save(foldername+filename+filenameextension+'_eigconds', eig_conds)
+            np.save(foldername+filename+filenameextension+'_rootconds', root_conds)
+        print('done with alpha = {}!'.format(alpha))
     if detailed: return data,eig_conds,root_conds
     else: return data
 
-def plot(datasets,labels=None,yaxislabel='Conditioning Ratio',subplots=None,title=None,filename='conditioning_ratio_plot',figsize=(6,4),dpi=400,best_fit=True,
-        _2nd_plot=None, min_ylim=None, max_ylim=None):
+def plot(datasets,labels=None,yaxislabel='Conditioning Ratio',subplots=None,title=None,filename='conditioning_ratio_plot',figsize=(6,4),
+         dpi=400,best_fit=True,_2nd_plot=None, min_ylim=None, max_ylim=None):
     """
     Plots conditioning ratio data.
 
@@ -543,24 +577,52 @@ def plot(datasets,labels=None,yaxislabel='Conditioning Ratio',subplots=None,titl
     plt.show()
 
 if __name__ == "__main__":
+    #for running random and devastating systems on the server
     #INPUT FORMAT test_type--dev or rand; newton_polish--newton or nopol; dims-- dimensions to run in
+    # input = sys.argv[1:]
+    # test = input[0]
+    # if input[1] == 'newton':
+    #     newton = True
+    # elif input[1] == 'nopol':
+    #     newton=False
+    # else:
+    #     raise ValueError("2nd input must be one of 'newton' for polishing or 'nopol' for no polishing")
+    # dims = [int(i) for i in input[2:]]
+    # if test == 'rand':
+    #     for dim in dims:
+    #         coeffs = np.load('random_coeffs/dim{}_deg2_randn.npy'.format(dim))
+    #         crs = get_conditioning_ratios(coeffs, newton)
+    # elif test == 'dev':
+    #     eps = .1
+    #     kind = 'power'
+    #     N = 50
+    #     devastating_conditioning_ratios(dims,eps,kind,newton,N=N)
+    # else:
+    #     raise ValueError("1st input must be one of 'rand' for random polys 'dev' for devastating example")
+
+    #for running nearly multiple roots on the server
     input = sys.argv[1:]
     test = input[0]
-    if input[1] == 'newton':
-        newton = True
-    elif input[1] == 'nopol':
-        newton=False
-    else:
-        raise ValueError("2nd input must be one of 'newton' for polishing or 'nopol' for no polishing")
-    dims = [int(i) for i in input[2:]]
-    if test == 'rand':
-        for dim in dims:
-            coeffs = np.load('random_tests/coeffs/dim{}_deg2_randn.npy'.format(dim))
-            crs = get_conditioning_ratios(coeffs, newton)
-    elif test == 'dev':
-        eps = .1
-        kind = 'power'
-        N = 50
-        devastating_conditioning_ratios(dims,eps,kind,newton,N=N)
-    else:
-        raise ValueError("1st input must be one of 'rand' for random polys 'dev' for devastating example")
+    digits_precision = input[1]
+    print(digits_precision)
+    mp.mp.dps = int(digits_precision)
+    print(mp.mp)
+    seed_min = int(input[2])
+    seed_max = int(input[3])
+    num_tests_per_dim = seed_max - seed_min
+    alpha_vals = input[4:]
+    for alpha in alpha_vals:
+        alpha = np.float(alpha)
+        if test == 'mult':
+            gen_func = gen_almost_multiple_roots
+        elif test == 'doub':
+            gen_func = gen_almost_double_roots
+        else:
+            raise ValueError("'test' must be one of 'mult', 'doub'")
+        get_data(alpha,
+                 gen_func,
+                 seeds = {2:range(seed_min,seed_max),3:range(seed_min,seed_max),4:range(seed_min,seed_max)},
+                 detailed=True,
+                 save=True,
+                 filename=None,
+                 filenameextension='_{}testsperdim_{}digitsprecision'.format(num_tests_per_dim,digits_precision))
