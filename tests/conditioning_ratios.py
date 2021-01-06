@@ -64,6 +64,7 @@ def devastating_conditioning_ratios(dims,eps,kind,newton,N=50,just_dev_root=True
     if kind in ['power','cheb']: shifted = False
     else: shifted = True
     for n,dim in zip(N,dims):
+        print(dim)
         if save:
             if newton: folder = 'conditioning_ratios/dev/newton/dim{}/'.format(dim)
             else:      folder = 'conditioning_ratios/dev/nopol/dim{}/'.format(dim)
@@ -73,6 +74,7 @@ def devastating_conditioning_ratios(dims,eps,kind,newton,N=50,just_dev_root=True
             ec = []
             rc = []
         for _ in range(n):
+            print(_)
             #get a random devastating example
             polys = randpoly(dim,eps,kind)
             if verbose>2: print('System Coeffs',*[p.coeff for p in polys],sep='\n')
@@ -213,10 +215,10 @@ def conditioningratio(polys,dim,newton,dev=False,shifted=None,root=None,verbose=
     else:
         #find the root at the origin
         if shifted:
-            dev_root = mp.ones(1,dim)
+            dev_root = mp.ones(dim,1)
         else:
-            dev_root = mp.zeros(1,dim)
-        idx = find_root_idx(roots,root)
+            dev_root = mp.zeros(dim,1)
+        idx = find_root_idx(roots,dev_root)
         #compute eigenvalue condition numbers
         eig_conds = []
         for d in range(dim):
@@ -225,10 +227,10 @@ def conditioningratio(polys,dim,newton,dev=False,shifted=None,root=None,verbose=
             eig_conds_curr = condeigs(M_,vals,vecR)
             arr = sort_eigs(vals,roots[:,d],arr=True)
             eig_conds.append([eig_conds_curr[int(k)] for k in arr][idx])
-        #compute the condition numbers of the roots
+        #compute the condition numbers of the root
         J = mp.matrix(dim)
         for j,poly in enumerate(polys):
-            grad = poly.grad(root)
+            grad = poly.grad(dev_root)
             for k in range(dim):
                 J[j,k] = grad[k]
         S = mp.svd(J,compute_uv=False)
