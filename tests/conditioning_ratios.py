@@ -425,7 +425,7 @@ def get_data(alpha,gen_func,seeds = {2:range(300),3:range(300),4:range(300)},det
                 eig_conds[dim].append(eig_cond)
             data[dim].extend(cr)
             if save:
-                if dim > 4:
+                if dim >= 4:
                     print('saving...')
                     dim_seed_marker = '_{}D_seed{}'.format(dim,n)
                     np.save(foldername+filename+dim_seed_marker+filenameextension, np.float64(cr))
@@ -445,7 +445,7 @@ def get_data(alpha,gen_func,seeds = {2:range(300),3:range(300),4:range(300)},det
                     np.save(foldername+filename+dim_marker+filenameextension+'_eigconds', eig_conds)
                     np.save(foldername+filename+dim_marker+filenameextension+'_rootconds', root_conds)
     if save:
-        print('saving...')
+        print('saving final results...')
         np.save(foldername+filename+filenameextension, data)
         if detailed:
             np.save(foldername+filename+filenameextension+'_eigconds', eig_conds)
