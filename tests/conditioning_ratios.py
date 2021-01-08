@@ -65,8 +65,8 @@ def devestating_conditioning_ratios(dims,eps,kind,newton,N=50,just_dev_root=True
     else: shifted = True
     for n,dim in zip(N,dims):
         if save:
-            if newton: folder = 'conditioning_ratios_files/dev/newton/dim{}/'.format(dim)
-            else:      folder = 'conditioning_ratios_files/dev/nopol/dim{}/'.format(dim)
+            if newton: folder = 'conditioning_ratios/dev/newton/dim{}/'.format(dim)
+            else:      folder = 'conditioning_ratios/dev/nopol/dim{}/'.format(dim)
         if verbose>0:print('Dimension', dim)
         cr = []
         if detailed:
@@ -253,8 +253,8 @@ def get_conditioning_ratios(coeffs, newton, save=True):
     not_full_roots = np.zeros(N,dtype=bool)
     crs = [0]*N
     if save:
-        if newton: folder = 'conditioning_ratios_files/rand/newton/dim{}/'.format(dim)
-        else:      folder = 'conditioning_ratios_files/rand/nopol/dim{}/'.format(dim)
+        if newton: folder = 'conditioning_ratios/rand/newton/dim{}/'.format(dim)
+        else:      folder = 'conditioning_ratios/rand/nopol/dim{}/'.format(dim)
     for i,system in enumerate(coeffs):
         polys = [er.MultiPower(c) for c in system]
         cr = conditioningratio(polys,dim,newton)
