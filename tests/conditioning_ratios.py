@@ -19,7 +19,7 @@ from matplotlib.ticker import FormatStrFormatter
 
 macheps = 2.220446049250313e-16
 
-def devastating_conditioning_ratios(dims,eps,kind,newton,N=50,just_dev_root=True,
+def devastating_conditioning_ratios(dims,eps,kind,newton,numtests=50,just_dev_root=True,
                                 seed=468,delta=0,save=True,verbose=0,detailed=False):
     """Computes the conditioning ratios of a system of polynomails.
 
@@ -34,7 +34,7 @@ def devastating_conditioning_ratios(dims,eps,kind,newton,N=50,just_dev_root=True
         'cheb', and 'chebs'.
     newton : bool
         whether or not to newton polish the roots
-    N : int or list
+    numtests : int or list
         number of tests to run in each dimension
     just_dev_root : bool
         If true, only returns conditioning ratios for the devastating root.
@@ -49,21 +49,21 @@ def devastating_conditioning_ratios(dims,eps,kind,newton,N=50,just_dev_root=True
         the level of verbosity
     returns
     -------
-    conditioning ratios: (dim, N, num_roots) or (dim, N) array
+    conditioning ratios: (dim, numtests, num_roots) or (dim, numtests) array
         Array of conditioning ratios. The [i,j] spot is  the conditioning ratio for
         the i'th coordinate in the j'th test system.
     """
     if verbose>0:print('Devastating Example in dimensions',dims)
     np.random.seed(seed)
-    if isinstance(N,int):
-        N = [N]*len(dims)
+    if isinstance(numtests,int):
+        numtests = [numtests]*len(dims)
     crs = dict() #conditioning ratios dictionary
     if detailed:
         rcs = dict()
         ecs = dict()
     if kind in ['power','cheb']: shifted = False
     else: shifted = True
-    for n,dim in zip(N,dims):
+    for n,dim in zip(numtests,dims):
         if save:
             if newton: folder = 'conditioning_ratios/dev/newton/dim{}/'.format(dim)
             else:      folder = 'conditioning_ratios/dev/nopol/dim{}/'.format(dim)
@@ -536,15 +536,15 @@ if __name__ == "__main__":
         newton=False
     else:
         raise ValueError("2nd input must be one of 'newton' for polishing or 'nopol' for no polishing")
-    N = int(input[2])
+    numtests = int(input[2])
     dims = [int(i) for i in input[3:]]
     if test == 'rand':
         for dim in dims:
             coeffs = np.load('random_tests/coeffs/dim{}_deg2_randn.npy'.format(dim))
-            crs = get_conditioning_ratios(coeffs[:N], newton)
+            crs = get_conditioning_ratios(coeffs[:numtests], newton)
     elif test == 'dev':
         eps = .1
         kind = 'power'
-        devastating_conditioning_ratios(dims,eps,kind,newton,N=N,verbose=1)
+        devastating_conditioning_ratios(dims,eps,kind,newton,numtests=numtests,verbose=1)
     else:
         raise ValueError("1st input must be one of 'rand' for random polys 'dev' for devastating example")
