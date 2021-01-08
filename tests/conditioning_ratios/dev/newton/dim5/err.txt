@@ -1,9 +1,0 @@
-Traceback (most recent call last):
-  File "conditioning_ratios.py", line 548, in <module>
-    devestating_conditioning_ratios(dims,eps,kind,newton,N=N)
-  File "conditioning_ratios.py", line 102, in devestating_conditioning_ratios
-    np.save(folder+'deg2_sys{}.npy'.format(_),cr)
-  File "<__array_function__ internals>", line 6, in save
-  File "/opt/anaconda3/lib/python3.7/site-packages/numpy/lib/npyio.py", line 541, in save
-    fid = open(file, "wb")
-FileNotFoundError: [Errno 2] No such file or directory: 'conditioning_ratios_files/dev/newton/dim5/deg2_sys0.npy'
