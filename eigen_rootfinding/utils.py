@@ -1431,8 +1431,8 @@ def condeig(A,eig,x,condvec=False):
     n = A.rows
     Q = householder(x)
     B = (Q.H)*A*Q
-    R = mp.qr(B[1:,1:]-eig*mp.eye(n-1))[1]
-    v = mp_solve_triangular(R,-B[0,1:].T,trans=2)
+    U,R = mp.qr(B[1:,1:]-eig*mp.eye(n-1))
+    v = mp_solve_triangular(R,-B[0,1:].H,trans=2)
     if condvec:
         S = mp.svd(R,compute_uv=False)
         return mp.sqrt(1+mp.norm(v)**2),1/(S[S.rows-1])
