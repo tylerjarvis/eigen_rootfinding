@@ -545,6 +545,6 @@ if __name__ == "__main__":
     elif test == 'dev':
         eps = .1
         kind = 'power'
-        devestating_conditioning_ratios(dims,eps,kind,newton,N=N)
+        devestating_conditioning_ratios(dims,eps,kind,newton,N=N,verbose=1)
     else:
         raise ValueError("1st input must be one of 'rand' for random polys 'dev' for devestating example")
