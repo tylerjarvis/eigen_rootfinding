@@ -225,12 +225,11 @@ def sort_eigs(eigs, diag, arr=False):
     if arr:
         n = len(diag)
         lst = list(range(n))
-        sorted_eigs = [0]*n
         arr = []
         for eig in eigs:
-            dists = [mp.fabs(eig - diag[l]) for l in lst]
-            nearest = lst.pop(np.argmin(dists))
-            arr.append(nearest)
+            i = lst[np.argmin([mp.fabs(diag[l] - eig) for l in lst])]
+            arr.append(i)
+            lst.remove(i)
         return np.argsort(arr)
     else:
         n = len(diag)
@@ -289,7 +288,7 @@ def msroots(M):
     Q, c = get_Q_c(dim)
     Q = mp.matrix(Q)
     c = mp.matrix(c)
-    My = [sum([Q[i,j]*M[i] for i in range(dim)]) for j in range(dim)]
+    My = [sum([Q[j,i]*M[i] for i in range(dim)]) for j in range(dim)]
 
     eigs = mp.matrix(dim, M[0].rows)
     # Compute the matrix U that triangularizes a random linear combination
