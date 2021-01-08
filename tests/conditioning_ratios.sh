@@ -1,7 +1,7 @@
 #!/bin/bash
 precision=100
 minseed=0
-maxseed=1 #CHANGE
+maxseed=100 #CHANGE
 
 alphas=( '1.00000000e-06 1.26485522e-06 1.59985872e-06'
          '2.02358965e-06 2.55954792e-06 3.23745754e-06'
