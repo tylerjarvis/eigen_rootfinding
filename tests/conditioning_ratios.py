@@ -53,7 +53,7 @@ def devastating_conditioning_ratios(dims,eps,kind,newton,N=50,just_dev_root=True
         Array of conditioning ratios. The [i,j] spot is  the conditioning ratio for
         the i'th coordinate in the j'th test system.
     """
-    if verbose>0:print('devastating Example in dimensions',dims)
+    if verbose>0:print('Devastating Example in dimensions',dims)
     np.random.seed(seed)
     if isinstance(N,int):
         N = [N]*len(dims)
