@@ -64,7 +64,6 @@ def devastating_conditioning_ratios(dims,eps,kind,newton,N=50,just_dev_root=True
     if kind in ['power','cheb']: shifted = False
     else: shifted = True
     for n,dim in zip(N,dims):
-        print(dim)
         if save:
             if newton: folder = 'conditioning_ratios/dev/newton/dim{}/'.format(dim)
             else:      folder = 'conditioning_ratios/dev/nopol/dim{}/'.format(dim)
@@ -74,7 +73,6 @@ def devastating_conditioning_ratios(dims,eps,kind,newton,N=50,just_dev_root=True
             ec = []
             rc = []
         for _ in range(n):
-            print(_)
             #get a random devastating example
             polys = randpoly(dim,eps,kind)
             if verbose>2: print('System Coeffs',*[p.coeff for p in polys],sep='\n')
