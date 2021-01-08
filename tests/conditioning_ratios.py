@@ -388,7 +388,6 @@ def get_data(alpha,gen_func,seeds = {2:range(300),3:range(300),4:range(300)},det
     root_conds = {d:[] for d in dims}
     eig_conds = {d:[] for d in dims}
     for dim in dims:
-        print(dim)
         for n in seeds[dim]:
             roots,polys = gen_func(dim=dim,seed=n,alpha=alpha)
             cr = conditioningratio(polys,dim,newton=False,root=roots[0],detailed=detailed)
@@ -405,7 +404,8 @@ def get_data(alpha,gen_func,seeds = {2:range(300),3:range(300),4:range(300)},det
     else: return data
 
 def plot(datasets,labels=None,yaxislabel='Conditioning Ratio',subplots=None,title=None,filename='conditioning_ratio_plot',figsize=(6,4),dpi=400,best_fit=True,
-        _2nd_plot=None, min_ylim=None, max_ylim=None):
+        _2nd_plot=None, min_ylim=None, max_ylim=None,
+        _2nd_plot_axis_labels=['Standard Deviation of Perturbation','Growth Rate, $r$']):
     """
     Plots conditioning ratio data.
 
@@ -461,10 +461,9 @@ def plot(datasets,labels=None,yaxislabel='Conditioning Ratio',subplots=None,titl
             growth_rate = 10**slope-1
             if label is not None:
                 print(label)
-            print('Slope:',slope, '\nIntercept:',intercept,'\nExponential Growth Rate:',growth_rate,end='\n\n')
+            print('Slope:',slope,'\nGrowth Rate:',growth_rate,end='\n\n')
             ax.plot(pos,pos*slope+intercept,c=color)
     if subplots is None:
-        dims = 2+np.arange(np.max([len(data.keys()) for data in datasets]))
         ax.yaxis.grid(color='gray',alpha=.15,linewidth=1,which='major')
         if labels is None:
             for i,dataset in enumerate(datasets):
@@ -486,25 +485,23 @@ def plot(datasets,labels=None,yaxislabel='Conditioning Ratio',subplots=None,titl
         else:
             ax.set_title(title)
     else:  # for subplots ##################################################################
-        for ax_,datasets_axis,title_axis,labels_axis in zip(ax,datasets,title,labels):
-            ax_.yaxis.grid(color='gray',alpha=.15,linewidth=1,which='major')
-            if labels is None:
-                for i,dataset in enumerate(datasets_axis):
-                    plot_dataset(ax_,dataset,f'C{i}')
-            else:
-                for i,dataset in enumerate(datasets_axis):
-                    plot_dataset(ax_,dataset,f'C{i}',labels_axis[i])
-            ax_.set_title('Conditioning Ratios of Quadratic Polynomial Systems')
-            ax_.set_xlabel('Dimension')
-            legend_elements = [Patch(facecolor=f'C{i}') for i in range(len(datasets_axis))]
-            ax_.legend(legend_elements,labels_axis)
-            if title is None:
-                ax_.set_title('Conditioning Ratios of Quadratic Polynomial Systems')
-            else:
-                ax_.set_title(title_axis)
+        ax[0].yaxis.grid(color='gray',alpha=.15,linewidth=1,which='major')
+        if labels is None:
+            for i,dataset in enumerate(datasets):
+                plot_dataset(ax[0],dataset,f'C{i}')
+        else:
+            for i,dataset in enumerate(datasets):
+                plot_dataset(ax[0],dataset,f'C{i}',labels[i])
+        ax[0].set_title('Conditioning Ratios of Quadratic Polynomial Systems')
+        ax[0].set_xlabel('Dimension')
+        legend_elements = [Patch(facecolor=f'C{i}') for i in range(len(datasets))]
+        ax[0].legend(legend_elements,labels)
+        if title is None:
+            ax[0].set_title('Conditioning Ratios of Quadratic Polynomial Systems')
+        else:
+            ax[0].set_title(title[0])
         if title is not None: plt.suptitle(title[-1])
         plt.tight_layout(rect=[0, 0.03, 1, 0.95])
-        dims = 2+np.arange(np.max([len(data.keys()) for data in datasets[0]]))
         ax[0].set_ylabel('Conditioning Ratio')
         ax[0].yaxis.set_major_formatter(mticker.StrMethodFormatter("$10^{{{x:.0f}}}$"))
         if min_ylim is not None:
@@ -515,8 +512,8 @@ def plot(datasets,labels=None,yaxislabel='Conditioning Ratio',subplots=None,titl
         if _2nd_plot is not None:
             ax[1].clear()
             ax[1].semilogy(_2nd_plot[0], _2nd_plot[1])
-            ax[1].set_xlabel(r'Standard Deviation of Perturbation, $\alpha$')
-            ax[1].set_ylabel('Growth Rate, $r$')
+            ax[1].set_xlabel(_2nd_plot_axis_labels[0])
+            ax[1].set_ylabel(_2nd_plot_axis_labels[1])
             ax[1].set_title(title[1])
             ax[1].set_xscale('log')
             ax[1].xaxis.set_ticks([x for p in range(-6,-1)
