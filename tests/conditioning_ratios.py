@@ -2,7 +2,7 @@
 Computes the conditioning ratios of random quadratics in dimensions
 2-10
 """
-from .devastating_example_test_scripts import *
+from devastating_example_test_scripts import *
 from eigen_rootfinding.utils import condeigs, newton_polish
 from eigen_rootfinding.polyroots import solve
 from eigen_rootfinding.Multiplication import *
@@ -536,15 +536,15 @@ if __name__ == "__main__":
         newton=False
     else:
         raise ValueError("2nd input must be one of 'newton' for polishing or 'nopol' for no polishing")
-    dims = [int(i) for i in input[2:]]
+    N = int(input[2])
+    dims = [int(i) for i in input[3:]]
     if test == 'rand':
         for dim in dims:
             coeffs = np.load('random_tests/coeffs/dim{}_deg2_randn.npy'.format(dim))
-            crs = get_conditioning_ratios(coeffs, newton)
+            crs = get_conditioning_ratios(coeffs[:N], newton)
     elif test == 'dev':
         eps = .1
         kind = 'power'
-        N = 50
         devestating_conditioning_ratios(dims,eps,kind,newton,N=N)
     else:
         raise ValueError("1st input must be one of 'rand' for random polys 'dev' for devestating example")

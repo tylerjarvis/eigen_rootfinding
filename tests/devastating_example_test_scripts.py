@@ -11,7 +11,7 @@ from eigen_rootfinding.MacaulayReduce import reduce_macaulay_svd, reduce_macaula
 from eigen_rootfinding.utils import ConditioningError
 import scipy.linalg as la
 import matplotlib.pyplot as plt
-from .random_tests import rand_coeffs
+from random_tests import rand_coeffs
 
 def condeig(A,eig,v):
     """Calculates the condition number of an eigenvalue of A"""
