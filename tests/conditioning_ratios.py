@@ -19,7 +19,7 @@ from matplotlib.ticker import FormatStrFormatter
 
 macheps = 2.220446049250313e-16
 
-def devestating_conditioning_ratios(dims,eps,kind,newton,N=50,just_dev_root=True,
+def devastating_conditioning_ratios(dims,eps,kind,newton,N=50,just_dev_root=True,
                                 seed=468,delta=0,save=True,verbose=0,detailed=False):
     """Computes the conditioning ratios of a system of polynomails.
 
@@ -28,16 +28,16 @@ def devestating_conditioning_ratios(dims,eps,kind,newton,N=50,just_dev_root=True
     dims : list of ints
         The dimensions to test
     eps : float
-        epsilon value for the devestating example
+        epsilon value for the devastating example
     kind : string
-        the type of devestating example system. One of 'power', 'spower',
+        the type of devastating example system. One of 'power', 'spower',
         'cheb', and 'chebs'.
     newton : bool
         whether or not to newton polish the roots
     N : int or list
         number of tests to run in each dimension
     just_dev_root : bool
-        If true, only returns conditioning ratios for the devestating root.
+        If true, only returns conditioning ratios for the devastating root.
         Otherwise, returns conditioning ratios for all roots.
     seed : int
         random seed to use in generating the systems
@@ -53,7 +53,7 @@ def devestating_conditioning_ratios(dims,eps,kind,newton,N=50,just_dev_root=True
         Array of conditioning ratios. The [i,j] spot is  the conditioning ratio for
         the i'th coordinate in the j'th test system.
     """
-    if verbose>0:print('Devestating Example in dimensions',dims)
+    if verbose>0:print('devastating Example in dimensions',dims)
     np.random.seed(seed)
     if isinstance(N,int):
         N = [N]*len(dims)
@@ -73,7 +73,7 @@ def devestating_conditioning_ratios(dims,eps,kind,newton,N=50,just_dev_root=True
             ec = []
             rc = []
         for _ in range(n):
-            #get a random devestating example
+            #get a random devastating example
             polys = randpoly(dim,eps,kind)
             if verbose>2: print('System Coeffs',*[p.coeff for p in polys],sep='\n')
             if delta > 0:
@@ -121,10 +121,10 @@ def conditioningratio(polys,dim,newton,dev=False,shifted=None,root=None,verbose=
     newton : bool
         whether or not to newton polish the roots
     dev : bool
-        whether or not we are computing the conditioning ratio for a devestating
+        whether or not we are computing the conditioning ratio for a devastating
         example system, in which case we want to use the root at the origin
     shifted : bool
-        for devestating systems, whether the system is
+        for devastating systems, whether the system is
     root : 1d nparray
         optional parameter for when you know the actual
         root you want to find the conditioning ratio of
@@ -545,6 +545,6 @@ if __name__ == "__main__":
     elif test == 'dev':
         eps = .1
         kind = 'power'
-        devestating_conditioning_ratios(dims,eps,kind,newton,N=N,verbose=1)
+        devastating_conditioning_ratios(dims,eps,kind,newton,N=N,verbose=1)
     else:
-        raise ValueError("1st input must be one of 'rand' for random polys 'dev' for devestating example")
+        raise ValueError("1st input must be one of 'rand' for random polys 'dev' for devastating example")
