@@ -2,7 +2,7 @@
 Computes the conditioning ratios of random quadratics in dimensions
 2-10
 """
-from devastating_example_test_scripts import *
+from .devastating_example_test_scripts import *
 from eigen_rootfinding.utils import condeigs, newton_polish
 from eigen_rootfinding.polyroots import solve
 from eigen_rootfinding.Multiplication import *
@@ -506,16 +506,15 @@ def plot(datasets,labels=None,yaxislabel='Conditioning Ratio',subplots=None,titl
         ax[0].yaxis.set_major_formatter(mticker.StrMethodFormatter("$10^{{{x:.0f}}}$"))
         if min_ylim is not None:
             ax[0].yaxis.set_ticks([np.log10(x) for p in range(min_ylim,max_ylim)
-                               for x in np.linspace(10**p, 10**(p+1), 10)], minor=True)
+                               for x in np.linspace(10**p, 10**(p+1), 1)], minor=True)
         # insert slopes subplot stuff here ####################################################
         #######################################################################################
         if _2nd_plot is not None:
             ax[1].clear()
-            ax[1].semilogy(_2nd_plot[0], _2nd_plot[1])
+            ax[1].loglog(_2nd_plot[0], _2nd_plot[1])
             ax[1].set_xlabel(_2nd_plot_axis_labels[0])
             ax[1].set_ylabel(_2nd_plot_axis_labels[1])
             ax[1].set_title(title[1])
-            ax[1].set_xscale('log')
             ax[1].xaxis.set_ticks([x for p in range(-6,-1)
                                for x in np.linspace(10**p, 10**(p+1), 10)],minor=True)
             ax[1].xaxis.set_ticks([10**p for p in range(-6,0)],minor=False)
