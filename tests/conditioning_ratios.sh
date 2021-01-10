@@ -3,7 +3,7 @@ precision=100 #decimal digits of precision
 minseed=0
 maxseed=100 #CHANGE number of samples
 multiplicities=( 1 2 3 4 ) #multiplicities of primary root to test
-dims=4 #without spaces-- it can't do more than 10
+dims=4 #without spaces, e.g. 234-- it can't do more than 10
 # all dimensions must be larger than highest multiplicity
 
 alphas=('1e-6'
