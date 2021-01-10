@@ -335,26 +335,7 @@ def get_MultiPower(center,roots):
     """
     return er.MultiPower(get_coeff(center,roots))
 
-def gen_almost_multiple_roots(dim,seed,alpha,verbose=False):
-    """
-    Generates an n-dimensional hyperellipse/hyperbola with random seed 'seed.'
-    The first root is *almost* multiplicity 'dim.' Specifically, the first root is chosen,
-    and then dim-1 perturbations of that root are forced to also be roots. Those perturbations
-    are chosen using a normal distribution in each coordinate with mean 0 and standard deviation alpha.
-    """
-    np.random.seed(seed)
-    centers = np.random.randn(dim,dim)
-    if verbose: print('Centers:',centers,sep='\n')
-    root = np.random.randn(dim)
-    if verbose: print('Root:',root,sep='\n')
-    dirs = np.random.randn(dim,dim)*alpha
-    dirs[0] = 0
-    if verbose: print('Directions:',dirs,sep='\n')
-    roots = root+dirs
-    if verbose: print('Roots:',roots,sep='\n')
-    return roots,[get_MultiPower(c,roots) for c in centers]
-
-def gen_almost_double_roots(dim,seed,alpha,verbose=False):
+def gen_almost_high_multiplicity_root(dim,multiplicity,alpha,seed,verbose=False):
     """
     Generates an n-dimensional hyperellipse/hyperbola with random seed 'seed.'
     The first root is *almost* a double root. Specifically, the first root is chosen,
@@ -366,50 +347,32 @@ def gen_almost_double_roots(dim,seed,alpha,verbose=False):
     centers = np.random.randn(dim,dim)
     if verbose: print('Centers:',centers,sep='\n')
     root = np.random.randn(1,dim)
-    if verbose: print('Root:',root,sep='\n')
-    direction = np.random.randn(1,dim)*alpha
-    if verbose: print('Perturbation:',direction,sep='\n')
-    root2 = root+direction
-    if verbose: print('Almost Double Root:',root2,sep='\n')
-    if dim > 2:
-        other_roots = np.random.randn(dim-2,dim)
-        if verbose: print('Other Roots:',other_roots,sep='\n')
-        roots = np.vstack((root,root2,other_roots))
-    else:
-        roots = np.vstack((root,root2))
-    if verbose: print('Total Roots:',roots,sep='\n')
+    if verbose: print('Primary Root:',root,sep='\n')
+    dirs = np.random.randn(multiplicity-1,dim)*alpha
+    if verbose: print('Perturbation Directions:',dirs,sep='\n')
+    nearby_roots = root+dirs
+    if verbose: print('{} Nearby Root(s):'.format(multiplicity-1),nearby_roots,sep='\n')
+    other_roots = np.random.randn(dim-multiplicity,dim)
+    if verbose: print('{} Other Fixed Root(s):'.format(dim-multiplicity),other_roots,sep='\n')
+    roots = np.vstack((root,nearby_roots,other_roots))
+    if verbose: print('All Fixed Roots:',roots,sep='\n')
     return roots,[get_MultiPower(c,roots) for c in centers]
 
-def gen_rand_hyperconic(dim,seed,alpha,verbose=False):
-    """
-    Generates an n-dimensional hyperellipse/hyperbola with random seed 'seed.'
-    There are dim randomly pre-chosen real roots. To see what they are, usee verbose=True.
-    """
-    np.random.seed(seed)
-    centers = np.random.randn(dim,dim)
-    if verbose: print('Centers:',centers,sep='\n')
-    roots = np.random.randn(dim,dim)
-    if verbose: print('Roots:',roots,sep='\n')
-    return roots,[get_MultiPower(c,roots) for c in centers]
-
-def get_data(alpha,gen_func,seeds = {2:range(300),3:range(300),4:range(300)},detailed=False,save=False,filename=None,filenameextension=''):
+def get_almost_high_multiplicity_root_data(alpha,dims,multiplicity=0,seeds={2:range(300),3:range(300),4:range(300)},
+             detailed=False,save=False,filename=None,filenameextension=''):
     """
     Computes the conditioning ratio of the first generated root of systems generated with gen_func(dim,seed,alpha) for each
     seed in the seeds dictionary.
     Seeds is assumed to be a dictionary where the keys are the dimensions you want to test in, and the values
     are an iterable of random seeds to generate random systems with.
     """
-    dims = seeds.keys()
+    if type(seeds)!=dict:
+        seeds = {d:seeds for d in dims}
     data = {d:[] for d in dims}
     root_conds = {d:[] for d in dims}
     eig_conds = {d:[] for d in dims}
     if save:
-        if gen_func.__name__ == 'gen_almost_double_roots':
-            test_type = 'doub'
-        elif gen_func.__name__ == 'gen_almost_multiple_roots':
-            test_type = 'mult'
-        elif gen_func.__name__ == 'gen_rand_hyperconic':
-            test_type = 'rand'
+        test_type = 'multiplicity{}'.format(multiplicity)
         foldername = 'conditioning_ratios/nearby_roots/'+test_type+'/'
         if filename is None:
             filename = 'alpha{}'.format(str(alpha).replace(".", "_"))
@@ -417,7 +380,12 @@ def get_data(alpha,gen_func,seeds = {2:range(300),3:range(300),4:range(300)},det
         print('dim',dim)
         for n in seeds[dim]:
             print('seed',n)
-            roots,polys = gen_func(dim=dim,seed=n,alpha=alpha)
+            if multiplicity == 0:
+                #by default, it will make the root have multiplicity dim
+                roots,polys = gen_almost_high_multiplicity_root(dim=dim,multiplicity=dim,alpha=alpha,seed=n)
+            else:
+                #otherwise, specified multiplicity
+                roots,polys = gen_almost_high_multiplicity_root(dim=dim,multiplicity=multiplicity,alpha=alpha,seed=n)
             cr = conditioningratio(polys,dim,newton=False,root=mp.matrix(roots[0]),detailed=detailed)
             if detailed:
                 cr, eig_cond, root_cond = cr
@@ -446,15 +414,16 @@ def get_data(alpha,gen_func,seeds = {2:range(300),3:range(300),4:range(300)},det
                     np.save(foldername+filename+dim_marker+filenameextension+'_rootconds', root_conds)
     if save:
         print('saving final results...')
-        np.save(foldername+filename+filenameextension, data)
+        final_save_msg = 'final'
+        np.save(foldername+filename+final_save_msg+filenameextension, data)
         if detailed:
-            np.save(foldername+filename+filenameextension+'_eigconds', eig_conds)
-            np.save(foldername+filename+filenameextension+'_rootconds', root_conds)
+            np.save(foldername+filename+final_save_msg+filenameextension+'_eigconds', eig_conds)
+            np.save(foldername+filename+final_save_msg+filenameextension+'_rootconds', root_conds)
         print('done with alpha = {}!'.format(alpha))
     if detailed: return data,eig_conds,root_conds
     else: return data
 
-def plot(datasets,labels=None,yaxislabel='Conditioning Ratio',subplots=None,title=None,filename='conditioning_ratio_plot',figsize=(6,4),
+def plot(datasets,labels=None,yaxislabel='Conditioning Ratio',xaxislabel='Dimension',subplots=None,title=None,filename='conditioning_ratio_plot',figsize=(6,4),
          dpi=400,best_fit=True,_2nd_plot=None, min_ylim=None, max_ylim=None,
          _2nd_plot_axis_labels=[r'Standard Deviation of Perturbation','Growth Rate, $r$']):
     """
@@ -477,7 +446,7 @@ def plot(datasets,labels=None,yaxislabel='Conditioning Ratio',subplots=None,titl
     #else: fig, ax = plt.subplots(nrows=subplots[0], ncols=subplots[1], figsize=figsize,dpi=dpi,sharey=True,sharex=True)
     else: fig, ax = plt.subplots(nrows=subplots[0], ncols=subplots[1], figsize=figsize,dpi=dpi,sharey=False,sharex=False)
     def plot_dataset(ax,data,color,label=None):
-        pos = 2+np.arange(len(data))
+        pos = np.array(list(data.keys()))
         #log before plot
         data_log10 = [np.log10(data[d].flatten()) for d in data.keys()]
         #violins
@@ -515,7 +484,6 @@ def plot(datasets,labels=None,yaxislabel='Conditioning Ratio',subplots=None,titl
             print('Slope:',slope, '\nIntercept:',intercept,'\nExponential Growth Rate:',growth_rate,end='\n\n')
             ax.plot(pos,pos*slope+intercept,c=color)
     if subplots is None:
-        dims = 2+np.arange(np.max([len(data.keys()) for data in datasets]))
         ax.yaxis.grid(color='gray',alpha=.15,linewidth=1,which='major')
         if labels is None:
             for i,dataset in enumerate(datasets):
@@ -529,7 +497,7 @@ def plot(datasets,labels=None,yaxislabel='Conditioning Ratio',subplots=None,titl
         if min_ylim is not None:
             ax.yaxis.set_ticks([np.log10(x) for p in range(min_ylim,max_ylim)
                                for x in np.linspace(10**p, 10**(p+1), 10)], minor=True)
-        ax.set_xlabel('Dimension')
+        ax.set_xlabel(xaxislabel)
         legend_elements = [Patch(facecolor=f'C{i}') for i in range(len(datasets))]
         ax.legend(legend_elements,labels)
         if title is None:
@@ -546,21 +514,20 @@ def plot(datasets,labels=None,yaxislabel='Conditioning Ratio',subplots=None,titl
                 for i,dataset in enumerate(datasets_axis):
                     plot_dataset(ax_,dataset,f'C{i}',labels_axis[i])
             ax_.set_title('Conditioning Ratios of Quadratic Polynomial Systems')
-            ax_.set_xlabel('Dimension')
+            ax_.set_xlabel(xaxislabel)
             legend_elements = [Patch(facecolor=f'C{i}') for i in range(len(datasets_axis))]
             ax_.legend(legend_elements,labels_axis)
             if title is None:
                 ax_.set_title('Conditioning Ratios of Quadratic Polynomial Systems')
             else:
                 ax_.set_title(title_axis)
+            ax_.set_ylabel(yaxislabel)
+            ax_.yaxis.set_major_formatter(mticker.StrMethodFormatter("$10^{{{x:.0f}}}$"))
+            if min_ylim is not None:
+                ax_.yaxis.set_ticks([np.log10(x) for p in range(min_ylim,max_ylim)
+                                   for x in np.linspace(10**p, 10**(p+1), 10)], minor=True)
         if title is not None: plt.suptitle(title[-1])
         plt.tight_layout(rect=[0, 0.03, 1, 0.95])
-        dims = 2+np.arange(np.max([len(data.keys()) for data in datasets[0]]))
-        ax[0].set_ylabel('Conditioning Ratio')
-        ax[0].yaxis.set_major_formatter(mticker.StrMethodFormatter("$10^{{{x:.0f}}}$"))
-        if min_ylim is not None:
-            ax[0].yaxis.set_ticks([np.log10(x) for p in range(min_ylim,max_ylim)
-                               for x in np.linspace(10**p, 10**(p+1), 10)], minor=True)
         # insert slopes subplot stuff here ####################################################
         #######################################################################################
         if _2nd_plot is not None:
@@ -578,50 +545,27 @@ def plot(datasets,labels=None,yaxislabel='Conditioning Ratio',subplots=None,titl
     plt.show()
 
 if __name__ == "__main__":
-    #for running random and devastating systems on the server
-    #INPUT FORMAT test_type--dev or rand; newton_polish--newton or nopol; dims-- dimensions to run in
-    # input = sys.argv[1:]
-    # test = input[0]
-    # if input[1] == 'newton':
-    #     newton = True
-    # elif input[1] == 'nopol':
-    #     newton=False
-    # else:
-    #     raise ValueError("2nd input must be one of 'newton' for polishing or 'nopol' for no polishing")
-    # dims = [int(i) for i in input[2:]]
-    # if test == 'rand':
-    #     for dim in dims:
-    #         coeffs = np.load('random_coeffs/dim{}_deg2_randn.npy'.format(dim))
-    #         crs = get_conditioning_ratios(coeffs, newton)
-    # elif test == 'dev':
-    #     eps = .1
-    #     kind = 'power'
-    #     N = 50
-    #     devastating_conditioning_ratios(dims,eps,kind,newton,N=N)
-    # else:
-    #     raise ValueError("1st input must be one of 'rand' for random polys 'dev' for devastating example")
-
     #for running nearly multiple roots on the server
     input = sys.argv[1:]
-    test = input[0]
-    digits_precision = input[1]
-    print(digits_precision)
-    mp.mp.dps = int(digits_precision)
+    dims = input[0] #input as a list without spaces
+    dims = [int(d) for d in dims]
+    print('dimensions',dims)
+    multiplicity = int(input[1])
+    print(multiplicity)
+    digits_precision = int(input[2])
+    print('digits precision',digits_precision)
+    mp.mp.dps = digits_precision
     print(mp.mp)
-    seed_min = int(input[2])
-    seed_max = int(input[3])
+    seed_min = int(input[3])
+    seed_max = int(input[4])
     num_tests_per_dim = seed_max - seed_min
-    alpha_vals = input[4:]
+    alpha_vals = input[5:]
+    assert multiplicity>0 and int(multiplicity) == multiplicity,"multiplicity must be a positive integer"
     for alpha in alpha_vals:
         alpha = np.float(alpha)
-        if test == 'mult':
-            gen_func = gen_almost_multiple_roots
-        elif test == 'doub':
-            gen_func = gen_almost_double_roots
-        else:
-            raise ValueError("'test' must be one of 'mult', 'doub'")
-        get_data(alpha,
-                 gen_func,
+        get_almost_high_multiplicity_root_data(alpha,
+                 dims=dims,
+                 multiplicity=multiplicity,
                  seeds = {2:range(seed_min,seed_max),3:range(seed_min,seed_max),4:range(seed_min,seed_max)},
                  detailed=True,
                  save=True,
