@@ -1,0 +1,16 @@
+Traceback (most recent call last):
+  File "conditioning_ratios.py", line 548, in <module>
+    devastating_conditioning_ratios(dims,eps,kind,newton,N=N,verbose=1)
+  File "conditioning_ratios.py", line 81, in devastating_conditioning_ratios
+    conditioning_ratio = conditioningratio(polys,dim,newton,dev=just_dev_root,shifted=shifted,verbose=verbose>1,detailed=detailed)
+  File "conditioning_ratios.py", line 137, in conditioningratio
+    roots,M = solve(polys,max_cond_num=np.inf,verbose=verbose,return_mult_matrices=True)
+  File "/home/yroots/eigen_rootfinding/tests/eigen_rootfinding/polyroots.py", line 72, in solve
+    return_mult_matrices=return_mult_matrices)
+  File "/home/yroots/eigen_rootfinding/tests/eigen_rootfinding/Multiplication.py", line 60, in multiplication
+    res = reduce_macaulay_svd(matrix, cut, bezout_bound, max_cond_num)
+  File "/home/yroots/eigen_rootfinding/tests/eigen_rootfinding/MacaulayReduce.py", line 164, in reduce_macaulay_svd
+    Q = svd(M[cut:,cut:])[2].conj().T
+  File "/home/yroots/.local/lib/python3.6/site-packages/scipy/linalg/decomp_svd.py", line 132, in svd
+    raise LinAlgError("SVD did not converge")
+numpy.linalg.LinAlgError: SVD did not converge
