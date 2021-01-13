@@ -7,9 +7,6 @@ from scipy.special import comb
 class InstabilityWarning(Warning):
     pass
 
-class MacaulayError(np.linalg.LinAlgError):
-    pass
-
 class ConditioningError(Exception):
     """Raised when the conditioning number of a matrix is not
     within the desired tolerance.

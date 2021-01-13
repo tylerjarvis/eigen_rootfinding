@@ -8,13 +8,57 @@ from eigen_rootfinding.utils import row_swap_matrix, slice_top, mon_combos
 from scipy import linalg as la
 from scipy.special import binom
 
-def svd_nullspace(matrix,nullity):
-    rank = matrix.shape[1] - nullity
-    U,S,Vh = np.linalg.svd(matrix)
+# TODO DOCSTRINGS
+def svd_nullspace(a,nullity=None):
+    """Computes the nullspace of a matrix via the singular value decomposition.
+
+    Parameters:
+    -----------
+    a : 2d ndarray
+        Matrix to compute the nullspace of
+    nullity : int
+        Nullity of matrix. Results are more reliable if the nullity of a
+        is known from the start.
+
+    Returns:
+    --------
+    N : 2d ndarray
+        Matrix whose columns form a basis for the nullspace of a
+    """
+    if nullity is none:
+        rank = np.linalg.matrix_rank(a)
+    else:
+        rank = a.shape[1] - nullity
+    U,S,Vh = np.linalg.svd(a)
     return Vh[rank:].T.conj()
 
 def nullspace_solve(polys, return_all_roots=True,method='svd',nullmethod='svd',
                     randcombos=False):
+    '''
+    Finds the roots of the given list of multidimensional polynomials using
+    the nullspace of the Macaulay matrix to create Moller-Stetter matrices.
+
+    Parameters
+    ----------
+    polys : list of polynomial objects
+        Polynomials to find the common roots of.
+    return_all_roots : bool
+        If True returns all the roots, otherwise just the ones in the unit box.
+    method : str
+        Which method to use to compute the Moller Stetter matrices from the nullspace.
+        Options are 'qrp','lq','svd'.
+    nullmethod : str
+        Which method to use to compute the nullspace of the Macaulay matrix.
+        Options are 'svd', 'fast'.
+    randcombos : bool
+        Whether or not to first take random linear combinations of the Macaulay matrix.
+        Not allowed for fast nullspace computations (nullmethod='fast').
+
+    returns
+    -------
+    roots : numpy array
+        The common roots of the polynomials. Each row is a root.
+    '''
     #setup
     degs = [poly.degree for poly in polys]
     dim = len(polys)
@@ -49,6 +93,32 @@ def nullspace_solve(polys, return_all_roots=True,method='svd',nullmethod='svd',
         return roots[[np.all(np.abs(root) <= 1) for root in roots]]
 
 def get_MS_qrp_nullspace(nullspace,matrix_terms,cut,bezout_bound,dim,power=True):
+    '''
+    Constructs the Moller-Stetter matrices from the nullspace of the macaulay matrix
+    via a QRP of the low degree terms in the nullspace.
+
+    Parameters
+    ----------
+    nullspace : 2d ndarray
+        Matrix whose rows (transposed) span the nullspace of the Macaulay matrix.
+    matrix_terms : 2d integer ndarray
+        Array containing the ordered column labels, where the ith row contains the
+        exponent/degree of the ith monomial.
+    cut : int
+        Number of highest degree columns in the nullspace
+    bezout_bound : int
+        Number of roots of the system
+    dim : int
+        Dimension of the system.
+    power : bool
+        Whether the polynomails are expressed in the Chebyshev or Power basis.
+
+    returns
+    -------
+    MS : (n, n, dim) ndarray
+        Array containing the nxn Möller-Stetter matrices, where the matrix
+        corresponding to multiplication by x_i is MS[..., i]
+    '''
     #QRP on low degree columns
     Q,R,P = la.qr(nullspace[:,cut:],pivoting=True)
     R1 = R[:,:bezout_bound]
@@ -81,6 +151,32 @@ def get_MS_qrp_nullspace(nullspace,matrix_terms,cut,bezout_bound,dim,power=True)
     return MS
 
 def get_MS_lq_nullspace(nullspace,matrix_terms,cut,bezout_bound,dim,power=True):
+    '''
+    Constructs the Moller-Stetter matrices from the nullspace of the macaulay matrix
+    via a LQ of the low degree terms in the nullspace.
+
+    Parameters
+    ----------
+    nullspace : 2d ndarray
+        Matrix whose rows (transposed) span the nullspace of the Macaulay matrix.
+    matrix_terms : 2d integer ndarray
+        Array containing the ordered column labels, where the ith row contains the
+        exponent/degree of the ith monomial.
+    cut : int
+        Number of highest degree columns in the nullspace
+    bezout_bound : int
+        Number of roots of the system
+    dim : int
+        Dimension of the system.
+    power : bool
+        Whether the polynomails are expressed in the Chebyshev or Power basis.
+
+    returns
+    -------
+    MS : (n, n, dim) ndarray
+        Array containing the nxn Möller-Stetter matrices, where the matrix
+        corresponding to multiplication by x_i is MS[..., i]
+    '''
     #QRP on low degree columns transposed
     Q,R,P = la.qr(nullspace[:,cut:].conj().T,pivoting=True)
     L = R[:bezout_bound].conj().T
@@ -103,6 +199,32 @@ def get_MS_lq_nullspace(nullspace,matrix_terms,cut,bezout_bound,dim,power=True):
     return MS
 
 def get_MS_svd_nullspace(nullspace,matrix_terms,cut,bezout_bound,dim,power=True):
+    '''
+    Constructs the Moller-Stetter matrices from the nullspace of the macaulay matrix
+    via a SVD of the low degree terms in the nullspace.
+
+    Parameters
+    ----------
+    nullspace : 2d ndarray
+        Matrix whose rows (transposed) span the nullspace of the Macaulay matrix.
+    matrix_terms : 2d integer ndarray
+        Array containing the ordered column labels, where the ith row contains the
+        exponent/degree of the ith monomial.
+    cut : int
+        Number of highest degree columns in the nullspace
+    bezout_bound : int
+        Number of roots of the system
+    dim : int
+        Dimension of the system.
+    power : bool
+        Whether the polynomails are expressed in the Chebyshev or Power basis.
+
+    returns
+    -------
+    MS : (n, n, dim) ndarray
+        Array containing the nxn Möller-Stetter matrices, where the matrix
+        corresponding to multiplication by x_i is MS[..., i]
+    '''
     #SVD on low degree columns
     U,S,Vh = la.svd(nullspace[:,cut:])
     V = Vh[:bezout_bound].conj().T
@@ -137,6 +259,7 @@ def all_shifts(polys, matrix_degree):
             shifts[np.sum(mon)+poly.degree].append(tuple([poly,mon]))
     return shifts
 
+#TODO DOCSTRINGS for this
 def new_terms(coeffs, old_term_set):
     new_term_set = set()
     for coeff in coeffs:
@@ -182,9 +305,8 @@ def null_reduce(N,shifts,old_matrix_terms,bigShape):
     R2 = np.reshape(new_flat_polys, (len(new_flat_polys),len(new_matrix_terms)))
 
     X = np.hstack([R1@N,R2])
-    #TODO can we know this analytically without computing?
-    nullity = X.shape[1] - np.linalg.matrix_rank(X)
-    K = svd_nullspace(X,nullity)
+    #TODO can we know nullity analytically without computing?
+    K = svd_nullspace(X)
 
     cut = N.shape[1]
     K1 = K[:cut]
@@ -208,9 +330,8 @@ def fast_null(polys):
 
     matrix, matrix_terms, cut = create_matrix(initial_coeffs, degs[0], dim)
 
-    #TODO can we know this analytically without computing?
-    nullity = matrix.shape[1] - np.linalg.matrix_rank(matrix)
-    N = svd_nullspace(matrix,nullity)
+    #TODO can we know nullity analytically without computing?
+    N = svd_nullspace(matrix)
 
     spot = 1
     while spot < len(degs):

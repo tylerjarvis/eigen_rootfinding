@@ -64,7 +64,8 @@ def indexarray_cheb(matrix_terms, which, var):
     return arr1, arr2
 
 def ms_matrices(E, Q, matrix_terms, dim):
-    """Compute the Möller-Stetter matrices in the monomial basis
+    """Compute the Möller-Stetter matrices in the monomial basis from a
+    reduced Macaulay matrix
 
     Parameters
     ----------
@@ -93,7 +94,8 @@ def ms_matrices(E, Q, matrix_terms, dim):
     return M
 
 def ms_matrices_cheb(E, Q, matrix_terms, dim):
-    """Compute the Möller-Stetter matrices in the Chebyshev basis
+    """Compute the Möller-Stetter matrices in the Chebyshev basis from a
+    reduced Macaulay matrix
 
     Parameters
     ----------
@@ -122,6 +124,26 @@ def ms_matrices_cheb(E, Q, matrix_terms, dim):
     return M
 
 def ms_matrices_p(E, P, matrix_terms, dim, cut):
+    """Compute the Möller-Stetter matrices in the power basis from a
+    reduced Macaulay matrix (QRP method)
+
+    Parameters
+    ----------
+    E : (m, k) ndarray
+        Columns of the reduced Macaulay matrix corresponding to the quotient basis
+    P : (, l) ndarray
+        Array of pivots returned in QR with pivoting, used to permute the columns.
+    matrix_terms : 2d ndarray
+        Array with ordered Chebyshev basis
+    dim : int
+        Number of variables
+
+    Returns
+    -------
+    M : (n, n, dim) ndarray
+        Array containing the nxn Möller-Stetter matrices, where the matrix
+        corresponding to multiplication by x_i is M[..., i]
+    """
     r, n = E.shape
     matrix_terms[cut:] = matrix_terms[cut:][P]
     M = np.empty((n, n, dim))
@@ -132,8 +154,8 @@ def ms_matrices_p(E, P, matrix_terms, dim, cut):
     return M
 
 def ms_matrices_p_cheb(E, P, matrix_terms, dim, cut):
-    """ Compute the Möller-Stetter matrices in the Chebyshev basis in the
-        Telen-Van Barel method.
+    """ Compute the Möller-Stetter matrices in the Chebyshev basis from a
+    reduced Macaulay matrix (QRP method)
 
     Parameters
     ----------
@@ -188,8 +210,24 @@ def sort_eigs(eigs, diag):
 
 @memoize
 def get_rand_combos_matrix(rows,cols):
+    """ Generates a rows by cols random matrix with orthogonal rows or columns,
+    depending on if rows > cols or cols > rows.
+
+    Parameters
+    ----------
+    rows : int
+        Number of rows
+    cols : int
+        Number of columns
+
+    Returns
+    -------
+    q : (rows,cols) ndarray
+        Matrix with orthgonal rows or columns, depending on if rows > cols or
+        cols > rows
+    """
     np.random.seed(57)
-    #todo perhaps explore types of random matrices?
+    #todo perhaps explore different types of random matrices?
     # randn was giving me conditioning problems
     size = max(rows,cols)
     C = ortho_group.rvs(size)
@@ -197,7 +235,7 @@ def get_rand_combos_matrix(rows,cols):
 
 @memoize
 def get_Q_c(dim):
-    """Generates a once-chosen random orthogonal matrix and a random linear combination
+    """ Generates a once-chosen random orthogonal matrix and a random linear combination
     for use in the simultaneous eigenvalue compution.
 
     Parameters

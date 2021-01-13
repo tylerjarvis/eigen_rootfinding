@@ -22,7 +22,7 @@ def macaulay_solve(polys, max_cond_num, verbose=False, return_all_roots=True,
                    method='svd',randcombos=False):
     '''
     Finds the roots of the given list of multidimensional polynomials using
-    a multiplication matrix.
+    a reduced Macaulay matrix to create Moller-Stetter mtarices
 
     Parameters
     ----------
@@ -34,6 +34,12 @@ def macaulay_solve(polys, max_cond_num, verbose=False, return_all_roots=True,
         Prints information about how the roots are computed.
     return_all_roots : bool
         If True returns all the roots, otherwise just the ones in the unit box.
+    method : str
+        Which method to use to reduce the Macaulay matrix the system.
+        Options are 'qrp','lq','svd'.
+    randcombos : bool
+        Whether or not to first take random linear combinations of the Macaulay matrix.
+
     returns
     -------
     roots : numpy array
@@ -157,9 +163,7 @@ def find_degree(poly_list, verbose=False):
     return sum(poly.degree for poly in poly_list) - len(poly_list) + 1
 
 def build_macaulay(initial_poly_list, verbose=False):
-    """Constructs the unreduced Macaulay matrix. Removes linear polynomials by
-    substituting in for a number of variables equal to the number of linear
-    polynomials.
+    """Constructs the unreduced Macaulay matrix.
 
     Parameters
     --------
@@ -176,14 +180,6 @@ def build_macaulay(initial_poly_list, verbose=False):
         exponent/degree of the ith basis monomial
     cut : int
         Where to cut the Macaulay matrix for the highest-degree monomials
-    varsToRemove : list
-        The variables removed with removing linear polynomials
-    A : 2d ndarray
-        A matrix giving the linear relations between the removed variables and
-        the remaining variables
-    Pc : 1d integer ndarray
-        Array containing the order of the variables as the appear in the columns
-        of A
     """
     power = is_power(initial_poly_list)
     dim = initial_poly_list[0].dim
@@ -231,8 +227,6 @@ def create_matrix(poly_coeffs, degree, dim):#, varsToRemove):
         The degree of the Macaulay Matrix
     dim : int
         The dimension of the polynomials going into the matrix.
-    varsToRemove : list
-        The variables to remove from the basis because we have linear polysnomials
     Returns
     -------
     matrix : 2D numpy array
@@ -277,8 +271,6 @@ def sorted_matrix_terms(degree, dim):#, varsToRemove):
         The degree of the Macaulay Matrix
     dim : int
         The dimension of the polynomials going into the matrix.
-    varsToRemove : list
-        The variables to remove from the basis because we have linear polysnomials
     Returns
     -------
     sorted_matrix_terms : numpy array
@@ -315,7 +307,7 @@ def sorted_matrix_terms(degree, dim):#, varsToRemove):
     return matrix_terms, cuts
 
 def reduce_macaulay_lq(M, cut, bezout_bound, max_cond=1e6):
-    """Reduces the Macaulay matrix using the Transposed QR method.
+    """Reduces the Macaulay matrix using the LQ method.
 
     Parameters:
     -----------
@@ -323,6 +315,8 @@ def reduce_macaulay_lq(M, cut, bezout_bound, max_cond=1e6):
         The Macaulay matrix
     cut : int
         Number of columns of max degree
+    bezout_bound : int
+        Number of roots of the system, determined by Bezout's theoerm
     max_cond : int or float
         Max condition number for the two condition number checks
 
@@ -366,7 +360,7 @@ def reduce_macaulay_lq(M, cut, bezout_bound, max_cond=1e6):
     return solve_triangular(M[:cut,:cut],M[:cut,bezout_rank:]),Q[:,-bezout_bound:]
 
 def reduce_macaulay_svd(M, cut, bezout_bound, max_cond=1e6):
-    """Reduces the Macaulay matrix using the Transposed QR method.
+    """Reduces the Macaulay matrix using the SVD method.
 
     Parameters:
     -----------
@@ -374,6 +368,8 @@ def reduce_macaulay_svd(M, cut, bezout_bound, max_cond=1e6):
         The Macaulay matrix
     cut : int
         Number of columns of max degree
+    bezout_bound : int
+        Number of roots of the system, determined by Bezout's theoerm
     max_cond : int or float
         Max condition number for the two condition number checks
 
@@ -417,6 +413,26 @@ def reduce_macaulay_svd(M, cut, bezout_bound, max_cond=1e6):
     return solve_triangular(M[:cut,:cut],M[:cut,bezout_rank:]),Q[:,-bezout_bound:]
 
 def reduce_macaulay_qrp(M, cut, bezout_bound, max_cond=1e6):
+    """Reduces the Macaulay matrix using the QRP method.
+
+    Parameters:
+    -----------
+    matrix : 2d ndarray
+        The Macaulay matrix
+    cut : int
+        Number of columns of max degree
+    bezout_bound : int
+            Number of roots of the system, determined by Bezout's theoerm
+    max_cond : int or float
+        Max condition number for the two condition number checks
+
+    Returns:
+    --------
+    E : 2d ndarray
+        The columns of the reduced Macaulay matrix corresponding to the quotient basis
+    P : 1d ndarray
+        Array of pivots returned in QR with pivoting, used to permute the columns.
+    """
     # Compute numerical rank
     s = svd(M, compute_uv=False)
     tol = max(M.shape)*s[0]*macheps
@@ -452,7 +468,29 @@ def reduce_macaulay_qrp(M, cut, bezout_bound, max_cond=1e6):
 
     return solve_triangular(M[:bezout_rank,:bezout_rank],M[:bezout_rank,bezout_rank:]),P
 
-def reduce_macaulay_p(M, cut, P, max_cond=1e6):
+def reduce_macaulay_p(M, cut, P, bezout_bound, max_cond=1e6):
+    """Reduces the Macaulay matrix using a predetermined permutation of columns.
+
+    Parameters:
+    -----------
+    matrix : 2d ndarray
+        The Macaulay matrix
+    cut : int
+        Number of columns of max degree
+    P : 1d ndarray
+        Predetermined Array of pivots 
+    bezout_bound : int
+            Number of roots of the system, determined by Bezout's theoerm
+    max_cond : int or float
+        Max condition number for the two condition number checks
+
+    Returns:
+    --------
+    E : 2d ndarray
+        The columns of the reduced Macaulay matrix corresponding to the quotient basis
+    P : 1d ndarray
+        Array of pivots
+    """
     # Compute numerical rank
     s = svd(M, compute_uv=False)
     tol = max(M.shape)*s[0]*macheps

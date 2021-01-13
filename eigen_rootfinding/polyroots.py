@@ -5,11 +5,50 @@ from eigen_rootfinding.Macaulay import macaulay_solve
 from eigen_rootfinding.Nullspace import nullspace_solve
 from eigen_rootfinding.utils import match_poly_dimensions, ConditioningError
 
-#todo docstrings EVERYWHERE
-#todo random linear combinations
-#todo test and decide which method to use a default
+#todo test and decide what to use as default
 def solve(polys, verbose=False, return_all_roots=True,
           max_cond_num=1.e6, method='svdmac',randcombos=False):
+    '''
+    Finds the roots of the given list of polynomials.
+
+    Parameters
+    ----------
+    polys : list of polynomial objects
+        Polynomials to find the common roots of.
+    verbose : bool
+        Prints information about how the roots are computed.
+    return_all_roots : bool
+        If True returns all the roots, otherwise just the ones in the unit box.
+    max_cond_num : float
+        The maximum condition number of the Macaulay matrix reduction
+    method : str
+        Which method to use to solve the system. Options are:
+        --1 dimension--
+            'multeigvals':
+                roots are computed as eigenvalues of multiplication matrix
+            'diveigvals':
+                roots are computed as eigenvalues of division matrix
+            'multeigvecs':
+                roots are from as eigenvectors of multiplication matrix
+            'diveigvecs':
+                roots are from as eigenvectors of division matrix
+        --n dimensions--
+            All methods compute roots as eigenvalues of Moller-Stetter (MS) matrices.
+            The methods vary in how the MS matrix is created.
+            'qrpmac','lqmac','svdmac':
+                Via QRP, LQ or SVD of Macaulay matrix
+            'qrpnull','lqnull','svdnull':
+                Via QRP, LQ or SVD of nullspace of Macaulay matrix, which is computed via SVD
+            'qrpfastnull','lqfastnull','svdfastnull': MS
+                Via QRP, LQ or SVD of nullspace of Macaulay matrix, which is computed using faster algorithm
+    randcombos : bool
+        Whether or not to first take random linear combinations of the Macaulay matrix.
+        Not allowed for fastnullspace reductions
+    returns
+    -------
+    roots : numpy array
+        The common roots of the polynomials. Each row is a root.
+    '''
     polys = match_poly_dimensions(polys)
     # Determine polynomial type and dimension of the system
     poly_type = is_power(polys, return_string = True)
@@ -49,6 +88,8 @@ def solve(polys, verbose=False, return_all_roots=True,
                 zeros = common
             return zeros
     else:
+        if len(polys) != dim:
+            raise ValueError('dimension must match len(polys)')
         if method in {'qrpnull','lqnull','svdnull',
                       'qrpfastnull','lqfastnull','svdfastnull'}:
             if method[-8:]=='fastnull':
