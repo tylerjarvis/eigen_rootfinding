@@ -1,21 +1,27 @@
 import numpy as np
 from eigen_rootfinding.polynomial import Polynomial, MultiCheb, MultiPower, getPoly
 from eigen_rootfinding.Macaulay import find_degree, mon_combos, create_matrix
-from eigen_rootfinding import polyroots as pr
+from eigen_rootfinding.polyroots import solve
 from eigen_rootfinding.utils import InstabilityWarning, arrays
 from itertools import product
 import unittest
 import warnings
 
-methods = ['qrpmac',
-           'svdmac',
-           'lqmac',
-           'qrpnull',
-           'svdnull',
-           'lqnull',
-           'qrpfastnull',
-           'svdfastnull',
-           'lqfastnull']
+methods = [('qrpmac',False),
+           ('svdmac',False),
+           ('lqmac',False),
+           ('qrpnull',False),
+           ('svdnull',False),
+           ('lqnull',False),
+           ('qrpmac',True),
+           ('svdmac',True),
+           ('lqmac',True),
+           ('qrpnull',True),
+           ('svdnull',True),
+           ('lqnull',True),
+           ('qrpfastnull',False),
+           ('svdfastnull',False),
+           ('lqfastnull',False)]
 
 def test_paper_example(methods=methods):
 
@@ -30,57 +36,59 @@ def test_paper_example(methods=methods):
     right_number_of_roots = 4
 
     for method in methods:
+        method,randcombos = method
         #~ ~ ~ Power Form, Mx Matrix ~ ~ ~
-        power_mult_roots = pr.solve([p1, p2], MSmatrix = 1)
+        power_mult_roots = solve([p1, p2],method=method,
+                                        randcombos=randcombos)
         assert len(power_mult_roots) == right_number_of_roots
         for root in power_mult_roots:
             assert np.isclose(0, p1(root), atol = 1.e-8)
             assert np.isclose(0, p2(root), atol = 1.e-8)
 
         #~ ~ ~ Cheb Form, Mx Matrix ~ ~ ~
-        cheb_mult_roots = pr.solve([c1, c2], MSmatrix = 1)
+        cheb_mult_roots = solve([c1, c2],method=method,randcombos=randcombos)
         assert len(cheb_mult_roots) == right_number_of_roots
         for root in cheb_mult_roots:
             assert np.isclose(0, c1(root), atol = 1.e-8)
             assert np.isclose(0, c1(root), atol = 1.e-8)
 
         #~ ~ ~ Power Form, My Matrix ~ ~ ~
-        power_multR_roots = pr.solve([p1, p2], MSmatrix = 2)
+        power_multR_roots = solve([p1, p2],method=method,randcombos=randcombos)
         assert len(power_multR_roots) == right_number_of_roots
         for root in power_multR_roots:
             assert np.isclose(0, p1(root), atol = 1.e-8)
             assert np.isclose(0, p2(root), atol = 1.e-8)
 
         #~ ~ ~ Cheb Form, My Matrix ~ ~ ~
-        cheb_multR_roots = pr.solve([c1, c2], MSmatrix = 2)
+        cheb_multR_roots = solve([c1, c2],method=method,randcombos=randcombos)
         assert len(cheb_multR_roots) == right_number_of_roots
         for root in cheb_multR_roots:
             assert np.isclose(0, c1(root), atol = 1.e-8)
             assert np.isclose(0, c1(root), atol = 1.e-8)
 
         #~ ~ ~ Power Form, Pseudorandom Multiplication Matrix ~ ~ ~
-        power_multrand_roots = pr.solve([p1, p2],MSmatrix = 0)
+        power_multrand_roots = solve([p1, p2],method=method,randcombos=randcombos)
         assert len(power_multrand_roots) == right_number_of_roots
         for root in power_multrand_roots:
             assert np.isclose(0, p1(root), atol = 1.e-8)
             assert np.isclose(0, p2(root), atol = 1.e-8)
 
         #~ ~ ~ Cheb Form, Pseudorandom Multiplication Matrix ~ ~ ~
-        cheb_multrand_roots = pr.solve([c1, c2], MSmatrix = 0)
+        cheb_multrand_roots = solve([c1, c2],method=method,randcombos=randcombos)
         assert len(cheb_multrand_roots) == right_number_of_roots
         for root in cheb_multrand_roots:
             assert np.isclose(0, c1(root), atol = 1.e-8)
             assert np.isclose(0, c1(root), atol = 1.e-8)
 
         #~ ~ ~ Power Form, Division Matrix ~ ~ ~
-        power_div_roots = pr.solve([p1, p2], MSmatrix = -1)
+        power_div_roots = solve([p1, p2],method=method,randcombos=randcombos)
         assert len(power_div_roots)== right_number_of_roots
         for root in power_div_roots:
             assert np.isclose(0, p1(root), atol = 1.e-8)
             assert np.isclose(0, p2(root), atol = 1.e-8)
 
         #~ ~ ~ Cheb Form, Division Matrix ~ ~ ~
-        cheb_div_roots = pr.solve([c1, c2], MSmatrix = -1)
+        cheb_div_roots = solve([c1, c2],method=method,randcombos=randcombos)
         assert len(cheb_div_roots) == right_number_of_roots
         for root in cheb_div_roots:
             assert np.isclose(0, c1(root), atol = 1.e-8)
@@ -95,7 +103,9 @@ def correctZeros(polys, methods=methods):
     on bad random runs)
     '''
     for method in methods:
-        zeros = pr.solve(polys)
+        print(method)
+        method,randcombos = method
+        zeros = solve(polys,method=method,randcombos=randcombos)
         correct = 0
         outOfRange = 0
         for zero in zeros:
@@ -122,14 +132,11 @@ def test_power_roots():
     A = getPoly(10,2,True)
     B = getPoly(10,2,True)
     correctZeros([A,B])
-    correctZeros([A,B])
 
     #Case 2 - Three MultiPower 3D degree 4 polynomials.
     A = getPoly(4,3,True)
     B = getPoly(4,3,True)
     C = getPoly(4,3,True)
-    correctZeros([A,B,C])
-    correctZeros([A,B,C])
     correctZeros([A,B,C])
 
     #Case 3 - Four MultiPower 4D degree 2 polynomials.
@@ -138,14 +145,10 @@ def test_power_roots():
     C = getPoly(2,4,True)
     D = getPoly(2,4,True)
     correctZeros([A,B,C,D])
-    correctZeros([A,B,C,D])
-    correctZeros([A,B,C,D])
-    correctZeros([A,B,C,D])
 
     #Case 4 - Two MultiPower 2D, one degree 5 and one degree 7
     A = getPoly(5,2,True)
     B = getPoly(7,2,True)
-    correctZeros([A,B])
     correctZeros([A,B])
 
     #Case 5 - Three MultiPower 3D of degrees 3,4 and 5
@@ -153,15 +156,11 @@ def test_power_roots():
     B = getPoly(4,3,True)
     C = getPoly(5,3,True)
     correctZeros([A,B,C])
-    correctZeros([A,B,C])
-    correctZeros([A,B,C])
 
-    # Case 6 - Two MultiPower 2D degree 1 polynomials.
-    A = getPoly(1, 2, True)
-    B = getPoly(1, 2, True)
-    correctZeros([A, B])
-    correctZeros([A, B])
-    correctZeros([A, B])
+    # # Case 6 - Two MultiPower 2D degree 1 polynomials.
+    # A = getPoly(1, 2, True)
+    # B = getPoly(1, 2, True)
+    # correctZeros([A, B])
 
 def test_cheb_roots():
     '''
@@ -175,14 +174,11 @@ def test_cheb_roots():
     A = getPoly(10,2,False)
     B = getPoly(10,2,False)
     correctZeros([A,B])
-    correctZeros([A,B])
 
     #Case 2 - Three MultiCheb 3D degree 4 polynomials.
     A = getPoly(4,3,False)
     B = getPoly(4,3,False)
     C = getPoly(4,3,False)
-    correctZeros([A,B,C])
-    correctZeros([A,B,C])
     correctZeros([A,B,C])
 
     #Case 3 - Four MultiCheb 4D degree 2 polynomials.
@@ -191,14 +187,10 @@ def test_cheb_roots():
     C = getPoly(2,4,False)
     D = getPoly(2,4,False)
     correctZeros([A,B,C,D])
-    correctZeros([A,B,C,D])
-    correctZeros([A,B,C,D])
-    correctZeros([A,B,C,D])
 
     #Case 4 - Two MultiCheb 2D, one degree 5 and one degree 7
     A = getPoly(5,2,False)
     B = getPoly(7,2,False)
-    correctZeros([A,B])
     correctZeros([A,B])
 
     #Case 5 - Three MultiCheb 3D of degrees 3,4 and 5
@@ -206,15 +198,8 @@ def test_cheb_roots():
     B = getPoly(4,3,False)
     C = getPoly(5,3,False)
     correctZeros([A,B,C])
-    correctZeros([A,B,C])
-    correctZeros([A,B,C])
 
-    # Case 6 - Two MultiCheb 2D degree 1 polynomials.
-    A = getPoly(1, 2, False)
-    B = getPoly(1, 2, False)
-    correctZeros([A, B])
-    correctZeros([A, B])
-    correctZeros([A, B])
-
-if __name__ == "__main__":
-    test_div_power_roots()
+    # # Case 6 - Two MultiCheb 2D degree 1 polynomials.
+    # A = getPoly(1, 2, False)
+    # B = getPoly(1, 2, False)
+    # correctZeros([A, B])

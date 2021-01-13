@@ -56,13 +56,13 @@ def solve(polys, verbose=False, return_all_roots=True,
                     #todo verify this is true
                     raise ValueError('Cannot do random linear combinations and fast nullspace together')
                 return nullspace_solve(polys, return_all_roots=return_all_roots,
-                                   method=method[:-8],nullmethod='fast',randcomobs=randcombos)
+                                   method=method[:-8],nullmethod='fast',randcombos=randcombos)
             else:
                 return nullspace_solve(polys, return_all_roots=return_all_roots,
-                               method=method[:-4],nullmethod='svd',randcomobs=randcombos)
+                               method=method[:-4],nullmethod='svd',randcombos=randcombos)
         elif method in {'qrpmac','lqmac','svdmac'}:
             res = macaulay_solve(polys, max_cond_num=max_cond_num, verbose=verbose,
-                                 return_all_roots=return_all_roots, method=method[:-3],randcomobs=randcombos)
+                                 return_all_roots=return_all_roots, method=method[:-3],randcombos=randcombos)
             if res[0] is None:
                 raise ConditioningError(res[1])
             else:

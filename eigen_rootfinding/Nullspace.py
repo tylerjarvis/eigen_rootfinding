@@ -24,7 +24,7 @@ def nullspace_solve(polys, return_all_roots=True,method='svd',nullmethod='svd',
         #build macaulay marix
         M,matrix_terms,cut = build_macaulay(polys)
         if randcombos:
-            C = get_rand_combos_matrix(M.shape[0])
+            C = get_rand_combos_matrix(M.shape[1]-bezout_bound,M.shape[0])
             M = C@M
         nullspace = svd_nullspace(M,bezout_bound).conj().T
     elif nullmethod=='fast':

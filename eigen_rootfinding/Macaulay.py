@@ -53,7 +53,7 @@ def macaulay_solve(polys, max_cond_num, verbose=False, return_all_roots=True,
 
     matrix, matrix_terms, cut = build_macaulay(polys, verbose)
     if randcombos:
-        C = get_rand_combos_matrix(matrix.shape[0])
+        C = get_rand_combos_matrix(matrix.shape[1]-bezout_bound,matrix.shape[0])
         matrix = C@matrix
 
     roots = np.array([])

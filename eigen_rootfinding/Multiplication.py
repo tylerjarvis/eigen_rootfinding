@@ -187,10 +187,13 @@ def sort_eigs(eigs, diag):
     return np.argsort(arr)
 
 @memoize
-def get_rand_combos_matrix(size):
+def get_rand_combos_matrix(rows,cols):
     np.random.seed(57)
     #todo perhaps explore types of random matrices?
-    return np.random.randn(size,size)
+    # randn was giving me conditioning problems
+    size = max(rows,cols)
+    C = ortho_group.rvs(size)
+    return C[:rows,:cols]
 
 @memoize
 def get_Q_c(dim):
