@@ -26,7 +26,6 @@ def test_inverse_P():
 
     # Find the order of columns to flip back to.
     pt = inverse_P(p)
-    print(pt)
     # Result done by hand.
     pt_inv = [4,0,3,2,1,5]
     assert(np.allclose(M,N[:,pt])), "Matrix are not the same."
@@ -83,8 +82,6 @@ def test_triangular_solve():
     true=sy.Matrix(new_matrix).rref()
     x = sy.symbols('x')
     f = sy.lambdify(x,true[0])
-    print(f(1))
-    print(new_matrix)
     assert(np.allclose(new_matrix,f(1)))
 
     # Randomize test case: longer rows than columns.
@@ -97,8 +94,6 @@ def test_triangular_solve():
     true=sy.Matrix(new_matrix).rref()
     x = sy.symbols('x')
     f = sy.lambdify(x,true[0])
-    print(f(1))
-    print(new_matrix)
     assert(np.allclose(new_matrix,f(1)))
 
 def test_sorted_polys_monomial():
