@@ -8,7 +8,6 @@ from eigen_rootfinding.utils import row_swap_matrix, slice_top, mon_combos
 from scipy import linalg as la
 from scipy.special import binom
 
-# TODO DOCSTRINGS
 def svd_nullspace(a,nullity=None):
     """Computes the nullspace of a matrix via the singular value decomposition.
 
@@ -25,7 +24,7 @@ def svd_nullspace(a,nullity=None):
     N : 2d ndarray
         Matrix whose columns form a basis for the nullspace of a
     """
-    if nullity is none:
+    if nullity is None:
         rank = np.linalg.matrix_rank(a)
     else:
         rank = a.shape[1] - nullity
