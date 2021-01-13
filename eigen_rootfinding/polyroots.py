@@ -40,7 +40,7 @@ def solve(polys, verbose=False, return_all_roots=True,
             'qrpnull','lqnull','svdnull':
                 Via QRP, LQ or SVD of nullspace of Macaulay matrix, which is computed via SVD
             'qrpfastnull','lqfastnull','svdfastnull': MS
-                Via QRP, LQ or SVD of nullspace of Macaulay matrix, which is computed using faster algorithm
+                Via QRP, LQ or SVD of nullspace of Macaulay matrix, which is computed degree by degree
     randcombos : bool
         Whether or not to first take random linear combinations of the Macaulay matrix.
         Not allowed for fastnullspace reductions
