@@ -9,7 +9,7 @@ from matplotlib import pyplot as plt
 from warnings import warn
 from eigen_rootfinding.Multiplication import ms_matrices,ms_matrices_p,\
                                              ms_matrices_cheb,ms_matrices_p_cheb,\
-                                             msroots
+                                             msroots,get_rand_combos_matrix
 
 macheps = 2.220446049250313e-16
 
@@ -19,7 +19,7 @@ def plot_scree(s,tol):
     plt.show()
 
 def macaulay_solve(polys, max_cond_num, verbose=False, return_all_roots=True,
-                   method='svd'):
+                   method='svd',randcombos=False):
     '''
     Finds the roots of the given list of multidimensional polynomials using
     a multiplication matrix.
@@ -52,6 +52,9 @@ def macaulay_solve(polys, max_cond_num, verbose=False, return_all_roots=True,
     bezout_bound = np.prod([poly.degree for poly in polys])
 
     matrix, matrix_terms, cut = build_macaulay(polys, verbose)
+    if randcombos:
+        C = get_rand_combos_matrix(matrix.shape[0])
+        matrix = C@matrix
 
     roots = np.array([])
 

@@ -187,6 +187,12 @@ def sort_eigs(eigs, diag):
     return np.argsort(arr)
 
 @memoize
+def get_rand_combos_matrix(size):
+    np.random.seed(57)
+    #todo perhaps explore types of random matrices?
+    return np.random.randn(size,size)
+
+@memoize
 def get_Q_c(dim):
     """Generates a once-chosen random orthogonal matrix and a random linear combination
     for use in the simultaneous eigenvalue compution.

@@ -1,7 +1,8 @@
 import numpy as np
 from eigen_rootfinding.Macaulay import build_macaulay, find_degree, \
                                        create_matrix
-from eigen_rootfinding.Multiplication import indexarray,indexarray_cheb,msroots
+from eigen_rootfinding.Multiplication import indexarray,indexarray_cheb,\
+                                             msroots,get_rand_combos_matrix
 from eigen_rootfinding.polynomial import is_power
 from eigen_rootfinding.utils import row_swap_matrix, slice_top, mon_combos
 from scipy import linalg as la
@@ -12,7 +13,8 @@ def svd_nullspace(matrix,nullity):
     U,S,Vh = np.linalg.svd(matrix)
     return Vh[rank:].T.conj()
 
-def nullspace_solve(polys, return_all_roots=True,method='svd',nullmethod='svd'):
+def nullspace_solve(polys, return_all_roots=True,method='svd',nullmethod='svd',
+                    randcombos=False):
     #setup
     degs = [poly.degree for poly in polys]
     dim = len(polys)
@@ -21,6 +23,9 @@ def nullspace_solve(polys, return_all_roots=True,method='svd',nullmethod='svd'):
     if nullmethod=='svd':
         #build macaulay marix
         M,matrix_terms,cut = build_macaulay(polys)
+        if randcombos:
+            C = get_rand_combos_matrix(M.shape[0])
+            M = C@M
         nullspace = svd_nullspace(M,bezout_bound).conj().T
     elif nullmethod=='fast':
         #todo change fast_null to make it
@@ -177,7 +182,7 @@ def null_reduce(N,shifts,old_matrix_terms,bigShape):
     R2 = np.reshape(new_flat_polys, (len(new_flat_polys),len(new_matrix_terms)))
 
     X = np.hstack([R1@N,R2])
-    #TODO: can we know this analytically without computing?
+    #TODO can we know this analytically without computing?
     nullity = X.shape[1] - np.linalg.matrix_rank(X)
     K = svd_nullspace(X,nullity)
 
