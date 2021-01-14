@@ -27,7 +27,7 @@ def svd_nullspace(a,nullity=None):
     U,S,Vh = np.linalg.svd(a)
     if nullity is None:
         #mimics np.linalg.matrix_rank
-        tol = S.max()*max(M.shape)*np.finfo(S.dtype).eps
+        tol = S.max()*max(a.shape)*np.finfo(S.dtype).eps
         rank = np.count_nonzero(S>tol)
     else:
         rank = a.shape[1] - nullity
