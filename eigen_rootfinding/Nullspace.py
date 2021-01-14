@@ -24,11 +24,13 @@ def svd_nullspace(a,nullity=None):
     N : 2d ndarray
         Matrix whose columns form a basis for the nullspace of a
     """
+    U,S,Vh = np.linalg.svd(a)
     if nullity is None:
-        rank = np.linalg.matrix_rank(a)
+        #mimics np.linalg.matrix_rank
+        tol = S.max()*max(M.shape)*np.finfo(S.dtype).eps
+        rank = np.count_nonzero(S>tol)
     else:
         rank = a.shape[1] - nullity
-    U,S,Vh = np.linalg.svd(a)
     return Vh[rank:].T.conj()
 
 def nullspace_solve(polys, return_all_roots=True,method='svd',nullmethod='svd',
@@ -330,6 +332,7 @@ def fast_null(polys):
     matrix, matrix_terms, cut = create_matrix(initial_coeffs, degs[0], dim)
 
     #TODO can we know nullity analytically without computing?
+    # there's a theorem for that
     N = svd_nullspace(matrix)
 
     spot = 1
