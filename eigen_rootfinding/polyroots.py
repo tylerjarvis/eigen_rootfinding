@@ -7,7 +7,8 @@ from eigen_rootfinding.utils import match_poly_dimensions, ConditioningError
 
 #todo test and decide what to use as default
 def solve(polys, verbose=False, return_all_roots=True,
-          max_cond_num=1.e6, method='svdmac',randcombos=False):
+          max_cond_num=1.e6, method='svdmac', randcombos=False,
+          normal=False):
     '''
     Finds the roots of the given list of polynomials.
 
@@ -44,6 +45,10 @@ def solve(polys, verbose=False, return_all_roots=True,
     randcombos : bool
         Whether or not to first take random linear combinations of the Macaulay matrix.
         Not allowed for fastnullspace reductions
+    normal : bool
+        If randcombos is True, whether or not to use a matrix with entries
+        drawn from the standard normal dsitribution when taking random
+        linear combinations of the Macaulay matrix.
     returns
     -------
     roots : numpy array
@@ -97,13 +102,16 @@ def solve(polys, verbose=False, return_all_roots=True,
                     #todo verify this is true
                     raise ValueError('Cannot do random linear combinations and fast nullspace together')
                 return nullspace_solve(polys, return_all_roots=return_all_roots,
-                                   method=method[:-8],nullmethod='fast',randcombos=randcombos)
+                                   method=method[:-8], nullmethod='fast',
+                                   randcombos=randcombos, normal=normal)
             else:
                 return nullspace_solve(polys, return_all_roots=return_all_roots,
-                               method=method[:-4],nullmethod='svd',randcombos=randcombos)
+                               method=method[:-4], nullmethod='svd',randcombos=randcombos,
+                               normal=normal)
         elif method in {'qrpmac','lqmac','svdmac'}:
             res = macaulay_solve(polys, max_cond_num=max_cond_num, verbose=verbose,
-                                 return_all_roots=return_all_roots, method=method[:-3],randcombos=randcombos)
+                                 return_all_roots=return_all_roots, method=method[:-3],
+                                 randcombos=randcombos, normal=normal)
             if res[0] is None:
                 raise ConditioningError(res[1])
             else:

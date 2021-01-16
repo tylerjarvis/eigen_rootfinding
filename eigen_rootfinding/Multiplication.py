@@ -209,7 +209,7 @@ def sort_eigs(eigs, diag):
     return np.argsort(arr)
 
 @memoize
-def get_rand_combos_matrix(rows,cols):
+def get_rand_combos_matrix(rows, cols, normal=False):
     """ Generates a rows by cols random matrix with orthogonal rows or columns,
     depending on if rows > cols or cols > rows.
 
@@ -219,19 +219,27 @@ def get_rand_combos_matrix(rows,cols):
         Number of rows
     cols : int
         Number of columns
+    normal : bool
+        Optional. Whether or not to create a matrix using entries drawn
+        from the standard normal distribution (N(0, 1)) or not. If it's
+        False, it will return an orthogonal matrix.
 
     Returns
     -------
-    q : (rows,cols) ndarray
+    C : (rows, cols) ndarray
         Matrix with orthgonal rows or columns, depending on if rows > cols or
-        cols > rows
+        cols > rows if normal is False, otherwise a matrix with
+        coefficients drawn from the standard normal (N(0, 1)).
     """
     np.random.seed(57)
-    #todo perhaps explore different types of random matrices?
+    # TODO perhaps explore different types of random matrices?
     # randn was giving me conditioning problems
-    size = max(rows,cols)
+    if normal:
+        C = np.random.normal(loc=0, scale=1, size=(rows, cols))
+        return C
+    size = max(rows, cols)
     C = ortho_group.rvs(size)
-    return C[:rows,:cols]
+    return C[:rows, :cols]
 
 @memoize
 def get_Q_c(dim):

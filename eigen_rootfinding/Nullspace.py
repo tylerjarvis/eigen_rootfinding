@@ -34,7 +34,7 @@ def svd_nullspace(a,nullity=None):
     return Vh[rank:].T.conj()
 
 def nullspace_solve(polys, return_all_roots=True,method='svd',nullmethod='svd',
-                    randcombos=False):
+                    randcombos=False, normal=False):
     '''
     Finds the roots of the given list of multidimensional polynomials using
     the nullspace of the Macaulay matrix to create Moller-Stetter matrices.
@@ -54,6 +54,10 @@ def nullspace_solve(polys, return_all_roots=True,method='svd',nullmethod='svd',
     randcombos : bool
         Whether or not to first take random linear combinations of the Macaulay matrix.
         Not allowed for fast nullspace computations (nullmethod='fast').
+    normal : bool
+        If randcombos is True, whether or not to use a matrix with entries
+        drawn from the standard normal dsitribution when taking random
+        linear combinations of the Macaulay matrix.
 
     returns
     -------
@@ -69,7 +73,7 @@ def nullspace_solve(polys, return_all_roots=True,method='svd',nullmethod='svd',
         #build macaulay marix
         M,matrix_terms,cut = build_macaulay(polys)
         if randcombos:
-            C = get_rand_combos_matrix(M.shape[1]-bezout_bound,M.shape[0])
+            C = get_rand_combos_matrix(M.shape[1]-bezout_bound,M.shape[0], normal=normal)
             M = C@M
         nullspace = svd_nullspace(M,bezout_bound).conj().T
     elif nullmethod=='fast':

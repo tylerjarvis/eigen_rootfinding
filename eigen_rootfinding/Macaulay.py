@@ -19,7 +19,7 @@ def plot_scree(s,tol):
     plt.show()
 
 def macaulay_solve(polys, max_cond_num, verbose=False, return_all_roots=True,
-                   method='svd',randcombos=False):
+                   method='svd', randcombos=False, normal=False):
     '''
     Finds the roots of the given list of multidimensional polynomials using
     a reduced Macaulay matrix to create Moller-Stetter mtarices
@@ -39,6 +39,10 @@ def macaulay_solve(polys, max_cond_num, verbose=False, return_all_roots=True,
         Options are 'qrp','lq','svd'.
     randcombos : bool
         Whether or not to first take random linear combinations of the Macaulay matrix.
+    normal : bool
+        If randcombos is True, whether or not to use a matrix with entries
+        drawn from the standard normal dsitribution when taking random
+        linear combinations of the Macaulay matrix.
 
     returns
     -------
@@ -59,7 +63,7 @@ def macaulay_solve(polys, max_cond_num, verbose=False, return_all_roots=True,
 
     matrix, matrix_terms, cut = build_macaulay(polys, verbose)
     if randcombos:
-        C = get_rand_combos_matrix(matrix.shape[1]-bezout_bound,matrix.shape[0])
+        C = get_rand_combos_matrix(matrix.shape[1]-bezout_bound,matrix.shape[0], normal=normal)
         matrix = C@matrix
 
     roots = np.array([])
