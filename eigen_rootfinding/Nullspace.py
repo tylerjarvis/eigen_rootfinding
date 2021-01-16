@@ -8,6 +8,7 @@ from eigen_rootfinding.utils import row_swap_matrix, slice_top, mon_combos
 from scipy import linalg as la
 from scipy.special import binom
 
+
 def svd_nullspace(a,nullity=None):
     """Computes the nullspace of a matrix via the singular value decomposition.
 
@@ -32,6 +33,7 @@ def svd_nullspace(a,nullity=None):
     else:
         rank = a.shape[1] - nullity
     return Vh[rank:].T.conj()
+
 
 def nullspace_solve(polys, return_all_roots=True,method='svd',nullmethod='svd',
                     randcombos=False, normal=False):
@@ -97,6 +99,7 @@ def nullspace_solve(polys, return_all_roots=True,method='svd',nullmethod='svd',
         # only return roots in the unit complex hyperbox
         return roots[[np.all(np.abs(root) <= 1) for root in roots]]
 
+
 def get_MS_qrp_nullspace(nullspace,matrix_terms,cut,bezout_bound,dim,power=True):
     '''
     Constructs the Moller-Stetter matrices from the nullspace of the macaulay matrix
@@ -155,6 +158,7 @@ def get_MS_qrp_nullspace(nullspace,matrix_terms,cut,bezout_bound,dim,power=True)
             MS[...,i] = (nullspace[:,arr[0]] + nullspace[:,arr[1]])/2
     return MS
 
+
 def get_MS_lq_nullspace(nullspace,matrix_terms,cut,bezout_bound,dim,power=True):
     '''
     Constructs the Moller-Stetter matrices from the nullspace of the macaulay matrix
@@ -202,6 +206,7 @@ def get_MS_lq_nullspace(nullspace,matrix_terms,cut,bezout_bound,dim,power=True):
             arr = indexarray_cheb(matrix_terms,lowdeg,i)
             MS[...,i] = (nullspace[:,arr[0]] + nullspace[:,arr[1]])@Q/2
     return MS
+
 
 def get_MS_svd_nullspace(nullspace,matrix_terms,cut,bezout_bound,dim,power=True):
     '''
@@ -251,7 +256,27 @@ def get_MS_svd_nullspace(nullspace,matrix_terms,cut,bezout_bound,dim,power=True)
             MS[...,i] = (nullspace[:,arr[0]] + nullspace[:,arr[1]])@V/2
     return MS
 
+
 def all_shifts(polys, matrix_degree):
+    """ Creates a dictionary of all the necessary shifts in the Macaulay
+    matrix up to degree matrix_degree (from the smallest degree of the
+    polys).
+
+    Parameters
+    ----------
+        polys : list of polynomial objects
+            The polynomial system of which the common roots are desired.
+        all_shifts
+
+    Returns
+    -------
+        shifts : dict of ints to lists of tuples
+            The dictionary of all the necessary shifts. The keys are the
+            different possible degrees from the minimum degree to the
+            specified matrix degree, and the values are lists of tuples,
+            corresponding to the polynomial and the monomial by which it
+            is multiplied.
+    """
     shifts = dict()
     min_degree = np.min([poly.degree for poly in polys])
     for i in range(min_degree,matrix_degree+1):
@@ -266,6 +291,24 @@ def all_shifts(polys, matrix_degree):
 
 #TODO DOCSTRINGS for this
 def new_terms(coeffs, old_term_set):
+    """ Gets the new terms for the next iteration of nullspace construction.
+
+    Parameters
+    ----------
+        coeffs : list of ndarrays
+            The coefficients of the polynomials with all the "shifts" or
+            monomial multiplications performed on them.
+        old_term_set : set of ndarrays
+            The set of the terms already accounted for in the nullspace
+            construction (found in the previous step).
+        
+    Returns
+    -------
+        ndarray
+            The new terms (monomials expressed as rows where
+            sum(row) <= deg) in the Macaulay matrix.
+            If there are no new terms, then returns None.
+    """
     new_term_set = set()
     for coeff in coeffs:
         for term in zip(*np.where(coeff!=0)):
@@ -277,6 +320,35 @@ def new_terms(coeffs, old_term_set):
         return np.vstack(tuple(new_term_set))
 
 def null_reduce(N,shifts,old_matrix_terms,bigShape):
+    """Create the next iteration of the nullspace construction
+    algorithm.
+
+    Parameters
+    ----------
+        N : ndarray
+            The nullspace computed in the previous iteration.
+        shifts : dict of ints to lists of tuples
+            A dictionary of the shifts where the keys are the
+            different possible degrees from the minimum degree to the
+            specified matrix degree, and the values are lists of tuples,
+            corresponding to the polynomial and the monomial by which it
+            is multiplied.
+        old_matrix_terms : ndarray
+            An array where the ith row corresponds to the monomial
+            of the ith column of the nullspace (the passed in value of
+            N) of the Macaulay matrix.
+        bigShape : list of ints
+            The shape that the next (degree higher) Macaulay matrix must
+            be to ensure that every term is accounted for.
+
+    Returns
+    -------
+        N : ndarray
+            The next nullspace computed in the iterative algorithm.
+        matrix_terms : ndarray
+            An array where the ith row corresponds to the monomial
+            of the ith column of the nullspace N of the Macaulay matrix.
+    """
     old_term_set = set()
     for term in old_matrix_terms:
         old_term_set.add(tuple(term))
@@ -321,6 +393,30 @@ def null_reduce(N,shifts,old_matrix_terms,bigShape):
     return N, matrix_terms
 
 def fast_null(polys):
+    """ Construct the nullspace of the Macaulay matrix created using the
+    given system of polynomials using the Degree By Degree Method
+    proposed by Telen in TODO: Cite paper.
+
+    Parameters
+    ----------
+        polys : list of Polynomial objects
+            The polynomial system of which the common roots are desired.
+        max_shifts : int
+            The maximum size of the blocks to use when working the new
+            shifts.
+
+    Returns
+    -------
+        N : ndarray
+            The nullspace of the Macaulay matrix created by the system
+            of polynomials.
+        matrix_terms : ndarray
+            An array where the ith row corresponds to the monomial
+            of the ith column of the nullspace N of the Macaulay matrix.
+        matrix_degree : int
+            The degree of the Macaulay matrix created by the system of
+            polynomials.
+    """
     matrix_degree = find_degree(polys)
     dim = polys[0].dim
     bigShape = [matrix_degree+1]*dim
