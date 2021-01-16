@@ -919,11 +919,11 @@ class Memoize:
 
 def memoize(function):
     cache = {}
-    def decorated_function(*args):
+    def decorated_function(*args, **kwargs):
         if args in cache:
             return cache[args]
         else:
-            val = function(*args)
+            val = function(*args, **kwargs)
             cache[args] = val
             return val
     return decorated_function
