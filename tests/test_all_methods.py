@@ -26,15 +26,14 @@ results.update({method + '_fm_normal': dict() for method in methods.difference(f
 results.update({method + '_fm_ortho': dict() for method in methods.difference(fast_null)})
 
 # Temporary testing for condition number stuff
-results = {'svdmac_fm_normal': dict(),
-           'svdmac_fm_ortho': dict(),
-           'svdmac': dict(),
-           'svdnull_fm_normal': dict(),
-           'svdnull_fm_ortho': dict(),
-           'svdnull': dict()}
+# results = {'svdmac_fm_normal': dict(),
+#            'svdmac_fm_ortho': dict(),
+#            'svdmac': dict(),
+#            'svdnull_fm_normal': dict(),
+#            'svdnull_fm_ortho': dict(),
+#            'svdnull': dict()}
 
-# dir = 'tests/variation_tests'
-dir = 'tests/variation_tests/fm_ortho_v_normal/conderr'
+dir = 'tests/variation_tests'
 
 
 def relative_residual(poly, root):
