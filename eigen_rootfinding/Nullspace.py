@@ -35,7 +35,7 @@ def svd_nullspace(a,nullity=None):
     return Vh[rank:].T.conj()
 
 
-def nullspace_solve(polys, return_all_roots=True,method='svd',nullmethod='svd',
+def nullspace_solve(polys, return_all_roots=True, method='svd', nullmethod='svd',
                     randcombos=False, normal=False):
     '''
     Finds the roots of the given list of multidimensional polynomials using
@@ -92,12 +92,12 @@ def nullspace_solve(polys, return_all_roots=True,method='svd',nullmethod='svd',
     elif method=='qrp': MSfunc=get_MS_qrp_nullspace
     MS = MSfunc(nullspace,matrix_terms,cut,bezout_bound,dim,power=is_power(polys))
     #return roots
-    roots = msroots(MS)
+    roots, cond = msroots(MS)
     if return_all_roots:
-        return roots
+        return roots, cond
     else:
         # only return roots in the unit complex hyperbox
-        return roots[[np.all(np.abs(root) <= 1) for root in roots]]
+        return roots[[np.all(np.abs(root) <= 1) for root in roots]], cond
 
 
 def get_MS_qrp_nullspace(nullspace,matrix_terms,cut,bezout_bound,dim,power=True):

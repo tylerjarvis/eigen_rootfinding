@@ -5,10 +5,9 @@ from eigen_rootfinding.Macaulay import macaulay_solve
 from eigen_rootfinding.Nullspace import nullspace_solve
 from eigen_rootfinding.utils import match_poly_dimensions, ConditioningError
 
-#todo test and decide what to use as default
+# TODO test and decide what to use as default
 def solve(polys, verbose=False, return_all_roots=True,
-          max_cond_num=1.e6, method='svdmac', randcombos=False,
-          normal=False):
+          max_cond_num=1.e6, method='svdmac', randcombos=False, normal=False):
     '''
     Finds the roots of the given list of polynomials.
 
@@ -109,12 +108,12 @@ def solve(polys, verbose=False, return_all_roots=True,
                                method=method[:-4], nullmethod='svd',randcombos=randcombos,
                                normal=normal)
         elif method in {'qrpmac','lqmac','svdmac'}:
-            res = macaulay_solve(polys, max_cond_num=max_cond_num, verbose=verbose,
+            res, cond = macaulay_solve(polys, max_cond_num=max_cond_num, verbose=verbose,
                                  return_all_roots=return_all_roots, method=method[:-3],
                                  randcombos=randcombos, normal=normal)
-            if res[0] is None:
-                raise ConditioningError(res[1])
+            if res is None:
+                raise ConditioningError(cond)
             else:
-                return res
+                return res, cond
         else:
             raise ValueError('invalid method type for multivariate solver')

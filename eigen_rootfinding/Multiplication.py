@@ -2,7 +2,7 @@ import numpy as np
 import itertools
 from scipy.linalg import eig, schur
 from eigen_rootfinding.polynomial import MultiCheb, MultiPower
-from eigen_rootfinding.utils import memoize
+from eigen_rootfinding.utils import condeigs, memoize
 from scipy.stats import ortho_group
 
 def indexarray(matrix_terms, which, var):
@@ -292,6 +292,14 @@ def msroots(M):
     # Compute the matrix U that triangularizes a random linear combination
     U = schur((M*c).sum(axis=-1), output='complex')[1]
 
+    # Compute eigenvalue condition numbers (will be the same for all matrices)
+    T = (U.conj().T)@(M[..., 0])@U
+    w, v = eig(M[..., 0])
+    arr = sort_eigs(w, np.diag(T))
+    eigs[0] = w[arr]
+
+    cond = condeigs(M[..., 0], eigs[0], v[:, arr])
+
     for i in range(0, dim):
         T = (U.conj().T)@(M[..., i])@U
         w = eig(M[..., i], right=False)
@@ -299,4 +307,4 @@ def msroots(M):
         eigs[i] = w[arr]
 
     # Rotate back before returning, transposing to match expected shape
-    return (Q.T@eigs).T
+    return (Q.T@eigs).T, cond

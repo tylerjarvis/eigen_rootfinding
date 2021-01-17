@@ -64,7 +64,7 @@ def macaulay_solve(polys, max_cond_num, verbose=False, return_all_roots=True,
     matrix, matrix_terms, cut = build_macaulay(polys, verbose)
     if randcombos:
         C = get_rand_combos_matrix(matrix.shape[1]-bezout_bound,matrix.shape[0], normal=normal)
-        matrix = C@matrix
+        matrix = C @ matrix
 
     roots = np.array([])
 
@@ -108,13 +108,13 @@ def macaulay_solve(polys, max_cond_num, verbose=False, return_all_roots=True,
                 M = ms_matrices_p(E, Q, matrix_terms, dim, cut)
 
         # Compute the roots using eigenvalues of the Möller-Stetter matrices
-        roots = msroots(M)
+        roots, condeigs = msroots(M)
 
     if return_all_roots:
-        return roots
+        return roots, condeigs
     else:
         # only return roots in the unit complex hyperbox
-        return roots[[np.all(np.abs(root) <= 1) for root in roots]]
+        return roots[[np.all(np.abs(root) <= 1) for root in roots]], condeigs
 
 def add_polys(degree, poly, poly_coeff_list):
     """Adds polynomials to a Macaulay Matrix.

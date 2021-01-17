@@ -1,7 +1,7 @@
 import numpy as np
-from yroots.polynomial import MultiCheb, MultiPower
+from eigen_rootfinding.polynomial import MultiCheb, MultiPower
 
-filefmt="random_tests/coeffs/dim{dim}_deg{deg}_{kind}.npy"
+filefmt="tests/random_tests/coeffs/dim{dim}_deg{deg}_{kind}.npy"
 def rand_coeffs(dim,deg,N,kind,maxint=10):
     shape = (*(deg+1,)*dim,dim,N)
     if kind == 'randint':
