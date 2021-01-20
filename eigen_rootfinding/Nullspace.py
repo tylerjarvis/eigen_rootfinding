@@ -6,9 +6,35 @@ from eigen_rootfinding.Multiplication import indexarray,indexarray_cheb,\
 from eigen_rootfinding.polynomial import is_power
 from eigen_rootfinding.utils import row_swap_matrix, slice_top, mon_combos
 from scipy import linalg as la
-from scipy.special import binom
+from scipy.special import comb
+from itertools import combinations
 
-def svd_nullspace(a,nullity=None):
+def get_nullity_macaulay(dim,deg,polydegs):
+    """Computes the nullity of a degree 'deg' Macaulay matrix analytically.
+
+    Parameters:
+    -----------
+    dim : int
+        Dimension of the system
+    deg : int
+        Macaulay degree
+    polydegs : list of ints
+        Degrees of the polynomials in the system
+
+    Returns:
+    --------
+    nullity : int
+        Nullity of the degree-'deg' Macaulay matrix
+    """
+    nullity = comb(dim+deg,dim,exact=True)
+    for j in range(1,dim+1):
+        innersum = 0
+        for polydegsubset in combinations(polydegs,j):
+            innersum += comb(dim+deg-sum(polydegsubset),dim,exact=True)
+        nullity += (-1)**j*innersum
+    return nullity
+
+def svd_nullspace(a,nullity=None, rank=None):
     """Computes the nullspace of a matrix via the singular value decomposition.
 
     Parameters:
@@ -25,12 +51,13 @@ def svd_nullspace(a,nullity=None):
         Matrix whose columns form a basis for the nullspace of a
     """
     U,S,Vh = np.linalg.svd(a)
-    if nullity is None:
-        #mimics np.linalg.matrix_rank
-        tol = S.max()*max(a.shape)*np.finfo(S.dtype).eps
-        rank = np.count_nonzero(S>tol)
-    else:
-        rank = a.shape[1] - nullity
+    if rank is None:
+        if nullity is None:
+            #mimics np.linalg.matrix_rank
+            tol = S.max()*max(a.shape)*np.finfo(S.dtype).eps
+            rank = np.count_nonzero(S>tol)
+        else:
+            rank = a.shape[1] - nullity
     return Vh[rank:].T.conj()
 
 def nullspace_solve(polys, return_all_roots=True,method='svd',nullmethod='svd',
@@ -75,7 +102,7 @@ def nullspace_solve(polys, return_all_roots=True,method='svd',nullmethod='svd',
     elif nullmethod=='fast':
         #todo change fast_null to make it
         #  return things in the order we want later
-        nullspace,matrix_terms,cut = fast_null(polys)
+        nullspace,matrix_terms,cut = fast_null(polys,degs)
         srt = np.argsort(matrix_terms.sum(axis=1))[::-1]
         nullspace = nullspace[srt]
         matrix_terms = matrix_terms[srt]
@@ -272,7 +299,7 @@ def new_terms(coeffs, old_term_set):
     else:
         return np.vstack(tuple(new_term_set))
 
-def null_reduce(N,shifts,old_matrix_terms,bigShape):
+def null_reduce(N,shifts,old_matrix_terms,bigShape,dim,deg,polydegs):
     old_term_set = set()
     for term in old_matrix_terms:
         old_term_set.add(tuple(term))
@@ -306,8 +333,8 @@ def null_reduce(N,shifts,old_matrix_terms,bigShape):
     R2 = np.reshape(new_flat_polys, (len(new_flat_polys),len(new_matrix_terms)))
 
     X = np.hstack([R1@N,R2])
-    #TODO can we know nullity analytically without computing?
-    K = svd_nullspace(X)
+    nullity = get_nullity_macaulay(dim,deg,polydegs)
+    K = svd_nullspace(X,nullity=nullity)
 
     cut = N.shape[1]
     K1 = K[:cut]
@@ -316,7 +343,7 @@ def null_reduce(N,shifts,old_matrix_terms,bigShape):
 
     return N, matrix_terms
 
-def fast_null(polys):
+def fast_null(polys,polydegs):
     matrix_degree = find_degree(polys)
     dim = polys[0].dim
     bigShape = [matrix_degree+1]*dim
@@ -331,14 +358,13 @@ def fast_null(polys):
 
     matrix, matrix_terms, cut = create_matrix(initial_coeffs, degs[0], dim)
 
-    #TODO can we know nullity analytically without computing?
-    # there's a theorem for that
-    N = svd_nullspace(matrix)
+    nullity = get_nullity_macaulay(dim,degs[0],polydegs)
+    N = svd_nullspace(matrix,nullity=nullity)
 
     spot = 1
     while spot < len(degs):
         deg = degs[spot]
         new_shifts = shifts[deg]
-        N,matrix_terms = null_reduce(N,new_shifts,matrix_terms,bigShape)
+        N,matrix_terms = null_reduce(N,new_shifts,matrix_terms,bigShape,dim,deg,polydegs)
         spot += 1
-    return N, matrix_terms, int(binom(dim+matrix_degree-1,matrix_degree))
+    return N, matrix_terms, comb(dim+matrix_degree-1,matrix_degree,exact=True)
