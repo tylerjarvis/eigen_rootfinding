@@ -8,7 +8,7 @@ from eigen_rootfinding.utils import match_poly_dimensions, ConditioningError
 #todo test and decide what to use as default
 def solve(polys, verbose=False, return_all_roots=True,
           max_cond_num=1.e6, method='svdmac', randcombos=False,
-          normal=False):
+          normal=False,return_mult_matrices=True):
     '''
     Finds the roots of the given list of polynomials.
 
@@ -101,17 +101,29 @@ def solve(polys, verbose=False, return_all_roots=True,
                 if randcombos:
                     #todo verify this is true
                     raise ValueError('Cannot do random linear combinations and fast nullspace together')
-                return nullspace_solve(polys, return_all_roots=return_all_roots,
-                                   method=method[:-8], nullmethod='fast',
-                                   randcombos=randcombos, normal=normal)
+                return nullspace_solve(polys,
+                                   return_all_roots=return_all_roots,
+                                   method=method[:-8],
+                                   nullmethod='fast',
+                                   randcombos=randcombos,
+                                   normal=normal,
+                                   return_mult_matrices=return_mult_matrices)
             else:
-                return nullspace_solve(polys, return_all_roots=return_all_roots,
-                               method=method[:-4], nullmethod='svd',randcombos=randcombos,
-                               normal=normal)
+                return nullspace_solve(polys,
+                               return_all_roots=return_all_roots,
+                               method=method[:-4],
+                               nullmethod='svd',
+                               randcombos=randcombos,
+                               normal=normal,
+                               return_mult_matrices=return_mult_matrices)
         elif method in {'qrpmac','lqmac','svdmac'}:
-            res = macaulay_solve(polys, max_cond_num=max_cond_num, verbose=verbose,
-                                 return_all_roots=return_all_roots, method=method[:-3],
-                                 randcombos=randcombos, normal=normal)
+            res = macaulay_solve(polys, max_cond_num=max_cond_num,
+                                 verbose=verbose,
+                                 return_all_roots=return_all_roots,
+                                 method=method[:-3],
+                                 randcombos=randcombos,
+                                 normal=normal,
+                                 return_mult_matrices=return_mult_matrices)
             if res[0] is None:
                 raise ConditioningError(res[1])
             else:

@@ -19,7 +19,7 @@ def plot_scree(s,tol):
     plt.show()
 
 def macaulay_solve(polys, max_cond_num, verbose=False, return_all_roots=True,
-                   method='svd', randcombos=False, normal=False):
+                   method='svd', randcombos=False, normal=False, return_mult_matrices=False):
     '''
     Finds the roots of the given list of multidimensional polynomials using
     a reduced Macaulay matrix to create Moller-Stetter mtarices
@@ -110,11 +110,11 @@ def macaulay_solve(polys, max_cond_num, verbose=False, return_all_roots=True,
         # Compute the roots using eigenvalues of the Möller-Stetter matrices
         roots = msroots(M)
 
-    if return_all_roots:
-        return roots
-    else:
-        # only return roots in the unit complex hyperbox
-        return roots[[np.all(np.abs(root) <= 1) for root in roots]]
+    if not return_all_roots:
+        roots = roots[[np.all(np.abs(root) <= 1) for root in roots]]
+    if return_mult_matrices: return roots, M
+    else: return roots
+
 
 def add_polys(degree, poly, poly_coeff_list):
     """Adds polynomials to a Macaulay Matrix.
@@ -482,7 +482,7 @@ def reduce_macaulay_p(M, cut, P, bezout_bound, max_cond=1e6):
     cut : int
         Number of columns of max degree
     P : 1d ndarray
-        Predetermined Array of pivots 
+        Predetermined Array of pivots
     bezout_bound : int
             Number of roots of the system, determined by Bezout's theoerm
     max_cond : int or float

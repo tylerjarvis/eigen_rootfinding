@@ -19,7 +19,7 @@ from matplotlib.ticker import FormatStrFormatter
 
 macheps = 2.220446049250313e-16
 
-def devastating_conditioning_ratios(dims,eps,kind,newton,numtests=50,just_dev_root=True,
+def devastating_conditioning_ratios(dims,eps,kind,newton,method,numtests=50,just_dev_root=True,
                                 seed=468,delta=0,save=True,verbose=0,detailed=False):
     """Computes the conditioning ratios of a system of polynomails.
 
@@ -78,7 +78,7 @@ def devastating_conditioning_ratios(dims,eps,kind,newton,numtests=50,just_dev_ro
             if verbose>2: print('System Coeffs',*[p.coeff for p in polys],sep='\n')
             if delta > 0:
                 polys = perturb(polys,delta)
-            conditioning_ratio = conditioningratio(polys,dim,newton,dev=just_dev_root,shifted=shifted,verbose=verbose>1,detailed=detailed)
+            conditioning_ratio = conditioningratio(polys,dim,newton,method,dev=just_dev_root,shifted=shifted,verbose=verbose>1,detailed=detailed)
             if newton:
                 if detailed:
                     conditioning_ratio, max_diff, smallest_dist_between_roots, eig_conds, root_conds = conditioning_ratio
@@ -109,7 +109,7 @@ def devastating_conditioning_ratios(dims,eps,kind,newton,numtests=50,just_dev_ro
     if detailed: return crs, ecs, rcs
     else: return crs
 
-def conditioningratio(polys,dim,newton,dev=False,shifted=None,root=None,verbose=False,detailed=False):
+def conditioningratio(polys,dim,newton,method,dev=False,shifted=None,root=None,verbose=False,detailed=False):
     """Computes the conditioning ratios of a system of polynomails.
 
     Parameters
@@ -134,7 +134,7 @@ def conditioningratio(polys,dim,newton,dev=False,shifted=None,root=None,verbose=
         Array of conditioning ratios. The [i,j] spot is  the conditioning ratio for
         the i'th coordinate of the j'th root.
     """
-    roots,M = solve(polys,max_cond_num=np.inf,verbose=verbose,return_mult_matrices=True)
+    roots,M = solve(polys,max_cond_num=np.inf,verbose=verbose,return_mult_matrices=True,method=method)
     if newton:
         dist_between_roots = la.norm(roots[:,np.newaxis]-roots,axis=2)
         smallest_dist_between_roots = np.min(dist_between_roots[np.nonzero(dist_between_roots)])
@@ -229,7 +229,7 @@ def conditioningratio(polys,dim,newton,dev=False,shifted=None,root=None,verbose=
             if newton: return ratios, max_diff, smallest_dist_between_roots
             else: return ratios
 
-def get_conditioning_ratios(coeffs, newton, save=True):
+def get_conditioning_ratios(coeffs, newton, method, save=True):
     """Computes the conditioning ratios of a bunch of systems of polynomails.
 
     Parameters
@@ -257,7 +257,7 @@ def get_conditioning_ratios(coeffs, newton, save=True):
         else:      folder = 'conditioning_ratios/rand/nopol/dim{}/'.format(dim)
     for i,system in enumerate(coeffs):
         polys = [er.MultiPower(c) for c in system]
-        cr = conditioningratio(polys,dim,newton)
+        cr = conditioningratio(polys,dim,newton,method)
         if newton:
 
             cr,max_diff,smallest_dist_between_roots = cr
@@ -376,7 +376,7 @@ def gen_rand_hyperconic(dim,seed,alpha,verbose=False):
     if verbose: print('Roots:',roots,sep='\n')
     return roots,[get_MultiPower(c,roots) for c in centers]
 
-def get_data(alpha,gen_func,seeds = {2:range(300),3:range(300),4:range(300)},detailed=False):
+def get_data(alpha,gen_func,method,seeds = {2:range(300),3:range(300),4:range(300)},detailed=False):
     """
     Computes the conditioning ratio of the first generated root of systems generated with gen_func(dim,seed,alpha) for each
     seed in the seeds dictionary.
@@ -390,7 +390,7 @@ def get_data(alpha,gen_func,seeds = {2:range(300),3:range(300),4:range(300)},det
     for dim in dims:
         for n in seeds[dim]:
             roots,polys = gen_func(dim=dim,seed=n,alpha=alpha)
-            cr = conditioningratio(polys,dim,newton=False,root=roots[0],detailed=detailed)
+            cr = conditioningratio(polys,dim,newton=False,method=method,root=roots[0],detailed=detailed)
             if detailed:
                 cr, eig_cond, root_cond = cr
                 root_conds[dim].append(root_cond)

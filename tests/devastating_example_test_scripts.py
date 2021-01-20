@@ -6,8 +6,8 @@ import eigen_rootfinding as eig_rf
 import numpy as np
 from scipy.stats import ortho_group
 from eigen_rootfinding.polynomial import MultiPower, MultiCheb
-from eigen_rootfinding.Multiplication import ms_matrices, ms_matrices_cheb, ms_matrices_p, build_macaulay, multiplication
-from eigen_rootfinding.Macaulay import reduce_macaulay_svd, reduce_macaulay_qrt, reduce_macaulay_qrp, reduce_macaulay_p
+from eigen_rootfinding.Multiplication import ms_matrices, ms_matrices_cheb, ms_matrices_p
+from eigen_rootfinding.Macaulay import reduce_macaulay_svd, reduce_macaulay_lq, reduce_macaulay_qrp, reduce_macaulay_p, build_macaulay
 from eigen_rootfinding.utils import ConditioningError
 import scipy.linalg as la
 import matplotlib.pyplot as plt
