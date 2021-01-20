@@ -1,4 +1,5 @@
 import sys
+import os
 import random_tests
 import eigen_rootfinding as er
 import numpy as np
@@ -69,6 +70,9 @@ if __name__ == "__main__":
     # dims = [2, 3, 4, 5, 6, 7]
 
     dims = [3, 4]
+    
+    for method in results.keys():
+        os.system(f"mkdir -p {dir}/{method}/")
 
     if len(sys.argv) > 1:
         # Specify dimension only
