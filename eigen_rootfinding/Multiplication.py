@@ -300,7 +300,7 @@ def msroots(M):
 
     cond = condeigs(M[..., 0], eigs[0], v[:, arr])
 
-    for i in range(0, dim):
+    for i in range(1, dim):
         T = (U.conj().T)@(M[..., i])@U
         w = eig(M[..., i], right=False)
         arr = sort_eigs(w, np.diag(T))

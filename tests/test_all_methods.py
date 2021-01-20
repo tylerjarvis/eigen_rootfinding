@@ -68,6 +68,15 @@ if __name__ == "__main__":
                 }
     dims = [2, 3, 4, 5, 6, 7]
 
+    if len(sys.argv) > 1:
+        # Specify dimension only
+        if len(sys.argv) >= 2:
+            dims = [int(sys.argv[1])]
+
+        # Specify the specific degree, too
+        if len(sys.argv) == 3:
+            dim_degs = {dims[0]: [int(sys.argv[2])]}
+
     # Random power polynomial tests
     for dim in dims:
         for method in results.keys():
@@ -118,5 +127,5 @@ if __name__ == "__main__":
                         results[method][dim][deg]['condeigs'].append([np.nan])
 
                     finally:
-                        with open(f'{dir}/{method}_poly_results.pkl', 'wb') as ofile:
+                        with open(f'{dir}/{method}_dim_{dim}_deg_{deg}_polys.pkl', 'wb') as ofile:
                             pickle.dump(results[method], ofile)
