@@ -164,7 +164,7 @@ def lcm(a,b):
     -------
     numpy array
         The lcm of the leading terms of a and b. The usual representation is
-        used, i.e., :math:`x^2y^3` is represented as :math:`\mathtt{(2,3)}`
+        used, i.e., :math:`x^2y^3` is represented as :math:`mathtt{(2,3)}`
     '''
     return np.maximum(a.lead_term, b.lead_term)
 
