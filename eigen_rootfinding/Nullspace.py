@@ -327,7 +327,7 @@ def new_terms(coeffs, old_term_set):
         old_term_set : set of ndarrays
             The set of the terms already accounted for in the nullspace
             construction (found in the previous step).
-        
+
     Returns
     -------
         ndarray
@@ -391,7 +391,7 @@ def null_reduce(N,shifts,old_matrix_terms,bigShape,dim,deg,polydegs):
 
     new_matrix_terms = new_terms(coeffs, old_term_set)
 
-    matrix_terms = np.vstack([old_matrix_terms, new_matrix_terms])
+    matrix_terms = np.vstack(tuple([old_matrix_terms, new_matrix_terms]))
 
     new_matrix_term_indexes = list()
     old_matrix_term_indexes = list()
