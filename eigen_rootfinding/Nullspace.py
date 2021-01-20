@@ -341,7 +341,7 @@ def new_terms(coeffs, old_term_set):
             if term not in old_term_set:
                 new_term_set.add(tuple(term))
     if len(new_term_set)==0:
-        return np.zeros((0,2))
+        return None
     else:
         return np.vstack(tuple(new_term_set))
 
