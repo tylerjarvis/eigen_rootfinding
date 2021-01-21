@@ -13,7 +13,7 @@ Eigen_Rootfinding is a Python package for numerical root finding. See  DemoNoteb
 <!-- [![Code Health](https://landscape.io/github/tylerjarvis/RootFinding/pypackage/landscape.svg)](https://landscape.io/github/tylerjarvis/RootFinding/pypackage) -->
 
 ### Requirements
-* Python 3.5 and up
+* Python 3.6 and up
 
 ## Installation
 
