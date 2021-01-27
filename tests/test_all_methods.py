@@ -61,7 +61,8 @@ def relative_residual(poly, root):
 
 if __name__ == "__main__":
     dim_degs = {#2: np.arange(2, 51),
-                3: [7, 8, 9], #[2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+                #3: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+                3: [8, 9],
                 4: [2, 3, 4] #, 5],
                 # 5: [2, 3],
                 # 6: [2],
@@ -93,6 +94,9 @@ if __name__ == "__main__":
             print("==================================================")
             for method in results.keys():
                 print(f"Starting with method {method}.")
+                # Flush so that the printed statements show up on time
+                sys.stdout.flush()
+                
                 randcombos = '_fm' in method
                 normal = '_fm_normal' in method
                 method2 = method
@@ -124,7 +128,8 @@ if __name__ == "__main__":
                         results[method][dim][deg]['rel_residuals'].append(rel_residuals)
                         results[method][dim][deg]['condeigs'].append(condeigs)
 
-                    except ConditioningError:
+                    # except ConditioningError:
+                    except Exception:  # Any exception, including SVD not converging.
                         # Dim 3, degree 7 system number 31 tends to have conditioning
                         # errors (for testing purposes)
                         results[method][dim][deg]['timings'].append(np.nan)
@@ -135,3 +140,4 @@ if __name__ == "__main__":
                     finally:
                         with open(f'{dir}/{method}/dim_{dim}_deg_{deg}_polys.pkl', 'wb') as ofile:
                             pickle.dump(results[method], ofile)
+
