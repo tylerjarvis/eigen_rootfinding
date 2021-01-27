@@ -26,13 +26,13 @@ results = {method: dict() for method in methods}
 results.update({method + '_fm_normal': dict() for method in methods.difference(fast_null)})
 results.update({method + '_fm_ortho': dict() for method in methods.difference(fast_null)})
 
-# Temporary testing for condition number stuff
-results = {'svdmac_fm_normal': dict(),
-           'svdmac_fm_ortho': dict(),
-           'svdmac': dict(),
-           'svdnull_fm_normal': dict(),
-           'svdnull_fm_ortho': dict(),
-           'svdnull': dict()}
+# # Temporary testing for condition number stuff
+# results = {'svdmac_fm_normal': dict(),
+#            'svdmac_fm_ortho': dict(),
+#            'svdmac': dict(),
+#            'svdnull_fm_normal': dict(),
+#            'svdnull_fm_ortho': dict(),
+#            'svdnull': dict()}
 
 dir = 'tests/variation_tests'
 
@@ -60,16 +60,14 @@ def relative_residual(poly, root):
 
 
 if __name__ == "__main__":
-    dim_degs = {#2: np.arange(2, 51),
-                3: [7, 8, 9], #[2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-                4: [2, 3, 4] #, 5],
-                # 5: [2, 3],
-                # 6: [2],
-                # 7: [2]
+    dim_degs = {2: np.arange(2, 31, 2),
+                3: [2, 3, 4, 5, 6, 10, 11, 12],
+                4: [5],
+                5: [2, 3],
+                6: [2],
+                7: [2]
                 }
-    # dims = [2, 3, 4, 5, 6, 7]
-
-    dims = [3, 4]
+    dims = [2, 3, 4, 5, 6, 7]
     
     for method in results.keys():
         os.system(f"mkdir -p {dir}/{method}/")
@@ -134,4 +132,4 @@ if __name__ == "__main__":
 
                     finally:
                         with open(f'{dir}/{method}/dim_{dim}_deg_{deg}_polys.pkl', 'wb') as ofile:
-                            pickle.dump(results[method], ofile)
+                            pickle.dump(results[method][dim][deg], ofile)
