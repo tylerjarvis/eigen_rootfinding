@@ -19,7 +19,7 @@ from matplotlib.ticker import FormatStrFormatter
 
 macheps = 2.220446049250313e-16
 
-def devastating_conditioning_ratios(dims,eps,kind,newton,method,randcombos,numtests=50,just_dev_root=True,
+def devastating_conditioning_ratios(dims,eps,kind,newton,method,randcombos=False,numtests=50,just_dev_root=True,
                                 seed=468,delta=0,save=True,verbose=0,detailed=False):
     """Computes the conditioning ratios of a system of polynomails.
 
@@ -78,7 +78,7 @@ def devastating_conditioning_ratios(dims,eps,kind,newton,method,randcombos,numte
             if verbose>2: print('System Coeffs',*[p.coeff for p in polys],sep='\n')
             if delta > 0:
                 polys = perturb(polys,delta)
-            conditioning_ratio = conditioningratio(polys,dim,newton,method,randcombos,dev=just_dev_root,shifted=shifted,verbose=verbose>1,detailed=detailed)
+            conditioning_ratio = conditioningratio(polys,dim,newton,method,randcombos=randcombos,dev=just_dev_root,shifted=shifted,verbose=verbose>1,detailed=detailed)
             if newton:
                 if detailed:
                     conditioning_ratio, max_diff, smallest_dist_between_roots, eig_conds, root_cond = conditioning_ratio
@@ -111,7 +111,7 @@ def devastating_conditioning_ratios(dims,eps,kind,newton,method,randcombos,numte
     if detailed: return crs, ecs, rcs
     else: return crs
 
-def conditioningratio(polys,dim,newton,method,randcombos,dev=False,shifted=None,root=None,verbose=False,detailed=False):
+def conditioningratio(polys,dim,newton,method,randcombos=False,dev=False,shifted=None,root=None,verbose=False,detailed=False):
     """Computes the conditioning ratios of a system of polynomails.
 
     Parameters
@@ -231,7 +231,7 @@ def conditioningratio(polys,dim,newton,method,randcombos,dev=False,shifted=None,
             if newton: return ratios, max_diff, smallest_dist_between_roots
             else: return ratios
 
-def get_conditioning_ratios(coeffs, newton, method, randcombos, save=True):
+def get_conditioning_ratios(coeffs, newton, method, randcombos=False, save=True):
     """Computes the conditioning ratios of a bunch of systems of polynomails.
 
     Parameters
@@ -259,7 +259,7 @@ def get_conditioning_ratios(coeffs, newton, method, randcombos, save=True):
         else:      folder = 'conditioning_ratios/rand/nopol/dim{}/'.format(dim)
     for i,system in enumerate(coeffs):
         polys = [er.MultiPower(c) for c in system]
-        cr = conditioningratio(polys,dim,newton,method,randcombos)
+        cr = conditioningratio(polys,dim,newton,method,randcombos=randcombos)
         if newton:
 
             cr,max_diff,smallest_dist_between_roots = cr
@@ -378,7 +378,7 @@ def gen_rand_hyperconic(dim,seed,alpha,verbose=False):
     if verbose: print('Roots:',roots,sep='\n')
     return roots,[get_MultiPower(c,roots) for c in centers]
 
-def get_data(alpha,gen_func,method,randcombos,seeds = {2:range(300),3:range(300),4:range(300)},detailed=False):
+def get_data(alpha,gen_func,method,randcombos=False,seeds = {2:range(300),3:range(300),4:range(300)},detailed=False):
     """
     Computes the conditioning ratio of the first generated root of systems generated with gen_func(dim,seed,alpha) for each
     seed in the seeds dictionary.
