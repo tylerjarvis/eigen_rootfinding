@@ -1,5 +1,5 @@
-Devestating Example in dimensions [6]
-6
+Devastating Example in dimensions [6]
+Dimension 6
 1 done
 1 saved
 2 done

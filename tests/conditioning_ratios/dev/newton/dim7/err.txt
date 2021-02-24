@@ -1,16 +1,15 @@
-nohup: ignoring input
 Traceback (most recent call last):
-  File "growth_factors.py", line 306, in <module>
-    devestating_growth_factors(dims,eps,kind,newton,N=N)
-  File "growth_factors.py", line 69, in devestating_growth_factors
-    growth_factor = growthfactor(polys,dim,newton,dev=just_dev_root,shifted=shifted)
-  File "growth_factors.py", line 101, in growthfactor
-    roots,M = solve(polys)
-  File "/home/yroots/RootFinding/yroots/polyroots.py", line 68, in solve
-    return multiplication(polys, max_cond_num=max_cond_num, verbose=verbose, return_all_roots=return_all_roots,method=method)
-  File "/home/yroots/RootFinding/yroots/Multiplication.py", line 75, in multiplication
-    E,Q,cond,cond_back = reduce_macaulay_svd(matrix,cut,max_cond_num)
-  File "/home/yroots/RootFinding/yroots/MacaulayReduce.py", line 147, in reduce_macaulay_svd
+  File "conditioning_ratios.py", line 548, in <module>
+    devastating_conditioning_ratios(dims,eps,kind,newton,N=N,verbose=1)
+  File "conditioning_ratios.py", line 81, in devastating_conditioning_ratios
+    conditioning_ratio = conditioningratio(polys,dim,newton,dev=just_dev_root,shifted=shifted,verbose=verbose>1,detailed=detailed)
+  File "conditioning_ratios.py", line 137, in conditioningratio
+    roots,M = solve(polys,max_cond_num=np.inf,verbose=verbose,return_mult_matrices=True)
+  File "/home/yroots/eigen_rootfinding/tests/eigen_rootfinding/polyroots.py", line 72, in solve
+    return_mult_matrices=return_mult_matrices)
+  File "/home/yroots/eigen_rootfinding/tests/eigen_rootfinding/Multiplication.py", line 60, in multiplication
+    res = reduce_macaulay_svd(matrix, cut, bezout_bound, max_cond_num)
+  File "/home/yroots/eigen_rootfinding/tests/eigen_rootfinding/MacaulayReduce.py", line 164, in reduce_macaulay_svd
     Q = svd(M[cut:,cut:])[2].conj().T
   File "/home/yroots/.local/lib/python3.6/site-packages/scipy/linalg/decomp_svd.py", line 132, in svd
     raise LinAlgError("SVD did not converge")

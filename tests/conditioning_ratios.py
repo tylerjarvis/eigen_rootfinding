@@ -19,7 +19,7 @@ from matplotlib.ticker import FormatStrFormatter
 
 macheps = 2.220446049250313e-16
 
-def devastating_conditioning_ratios(dims,eps,kind,newton,N=50,just_dev_root=True,
+def devastating_conditioning_ratios(dims,eps,kind,newton,method,randcombos=False,numtests=50,just_dev_root=True,
                                 seed=468,delta=0,save=True,verbose=0,detailed=False):
     """Computes the conditioning ratios of a system of polynomails.
 
@@ -34,7 +34,7 @@ def devastating_conditioning_ratios(dims,eps,kind,newton,N=50,just_dev_root=True
         'cheb', and 'chebs'.
     newton : bool
         whether or not to newton polish the roots
-    N : int or list
+    numtests : int or list
         number of tests to run in each dimension
     just_dev_root : bool
         If true, only returns conditioning ratios for the devastating root.
@@ -49,24 +49,24 @@ def devastating_conditioning_ratios(dims,eps,kind,newton,N=50,just_dev_root=True
         the level of verbosity
     returns
     -------
-    conditioning ratios: (dim, N, num_roots) or (dim, N) array
+    conditioning ratios: (dim, numtests, num_roots) or (dim, numtests) array
         Array of conditioning ratios. The [i,j] spot is  the conditioning ratio for
         the i'th coordinate in the j'th test system.
     """
     if verbose>0:print('Devastating Example in dimensions',dims)
     np.random.seed(seed)
-    if isinstance(N,int):
-        N = [N]*len(dims)
+    if isinstance(numtests,int):
+        numtests = [numtests]*len(dims)
     crs = dict() #conditioning ratios dictionary
     if detailed:
         rcs = dict()
         ecs = dict()
     if kind in ['power','cheb']: shifted = False
     else: shifted = True
-    for n,dim in zip(N,dims):
+    for n,dim in zip(numtests,dims):
         if save:
-            if newton: folder = 'conditioning_ratios/dev/newton/dim{}/'.format(dim)
-            else:      folder = 'conditioning_ratios/dev/nopol/dim{}/'.format(dim)
+            if newton: folder = 'conditioning_ratios/'+method+'/dev/newton/dim{}/'.format(dim)
+            else:      folder = 'conditioning_ratios/'+method+'/dev/nopol/dim{}/'.format(dim)
         if verbose>0:print('Dimension', dim)
         cr = []
         if detailed:
@@ -78,10 +78,12 @@ def devastating_conditioning_ratios(dims,eps,kind,newton,N=50,just_dev_root=True
             if verbose>2: print('System Coeffs',*[p.coeff for p in polys],sep='\n')
             if delta > 0:
                 polys = perturb(polys,delta)
-            conditioning_ratio = conditioningratio(polys,dim,newton,dev=just_dev_root,shifted=shifted,verbose=verbose>1,detailed=detailed)
+            conditioning_ratio = conditioningratio(polys,dim,newton,method,randcombos=randcombos,dev=just_dev_root,shifted=shifted,verbose=verbose>1,detailed=detailed)
             if newton:
                 if detailed:
-                    conditioning_ratio, max_diff, smallest_dist_between_roots, eig_conds, root_conds = conditioning_ratio
+                    conditioning_ratio, max_diff, smallest_dist_between_roots, eig_conds, root_cond = conditioning_ratio
+                    ec.append(eig_conds)
+                    rc.append(root_cond)
                     if 10*max_diff >= smallest_dist_between_roots:
                         print('**Potentially converging roots with polishing**')
                         print('\tNewton changed roots by at most: {}'.format(max_diff))
@@ -113,7 +115,7 @@ def find_root_idx(roots,root):
     dists = [mp.norm(roots[root_num,:].T - root) for root_num in range(roots.rows)]
     return np.argmin(dists)
 
-def conditioningratio(polys,dim,newton,dev=False,shifted=None,root=None,verbose=False,detailed=False):
+def conditioningratio(polys,dim,newton,method,randcombos=False,dev=False,shifted=None,root=None,verbose=False,detailed=False):
     """Computes the conditioning ratios of a system of polynomails.
 
     Parameters
@@ -138,7 +140,7 @@ def conditioningratio(polys,dim,newton,dev=False,shifted=None,root=None,verbose=
         Array of conditioning ratios. The [i,j] spot is  the conditioning ratio for
         the i'th coordinate of the j'th root.
     """
-    roots,M = solve(polys,max_cond_num=np.inf,verbose=verbose,return_mult_matrices=True)
+    roots,M = solve(polys,max_cond_num=np.inf,verbose=verbose,return_mult_matrices=True,method=method,randcombos=randcombos)
     if newton:
         dist_between_roots = la.norm(roots[:,np.newaxis]-roots,axis=2)
         smallest_dist_between_roots = np.min(dist_between_roots[np.nonzero(dist_between_roots)])
@@ -246,7 +248,7 @@ def conditioningratio(polys,dim,newton,dev=False,shifted=None,root=None,verbose=
             if newton: return ratios, max_diff, smallest_dist_between_roots
             else: return ratios
 
-def get_conditioning_ratios(coeffs, newton, save=True):
+def get_conditioning_ratios(coeffs, newton, method, randcombos=False, save=True):
     """Computes the conditioning ratios of a bunch of systems of polynomails.
 
     Parameters
@@ -270,11 +272,11 @@ def get_conditioning_ratios(coeffs, newton, save=True):
     not_full_roots = np.zeros(N,dtype=bool)
     crs = [0]*N
     if save:
-        if newton: folder = 'conditioning_ratios/rand/newton/dim{}/'.format(dim)
-        else:      folder = 'conditioning_ratios/rand/nopol/dim{}/'.format(dim)
+        if newton: folder = 'conditioning_ratios/'+method+'/rand/newton/dim{}/'.format(dim)
+        else:      folder = 'conditioning_ratios/'+method+'/rand/nopol/dim{}/'.format(dim)
     for i,system in enumerate(coeffs):
         polys = [er.MultiPower(c) for c in system]
-        cr = conditioningratio(polys,dim,newton)
+        cr = conditioningratio(polys,dim,newton,method,randcombos=randcombos)
         if newton:
 
             cr,max_diff,smallest_dist_between_roots = cr
@@ -358,8 +360,8 @@ def gen_almost_high_multiplicity_root(dim,multiplicity,alpha,seed,verbose=False)
     if verbose: print('All Fixed Roots:',roots,sep='\n')
     return roots,[get_MultiPower(c,roots) for c in centers]
 
-def get_almost_high_multiplicity_root_data(alpha,dims,multiplicity=0,seeds={2:range(300),3:range(300),4:range(300)},
-             detailed=False,save=False,filename=None,filenameextension=''):
+def get_almost_high_multiplicity_root_data(alpha,dims,multiplicity=0,method,randcombos=False,seeds={2:range(300),3:range(300),4:range(300)},
+         detailed=False,save=False,filename=None,filenameextension=''):
     """
     Computes the conditioning ratio of the first generated root of systems generated with gen_func(dim,seed,alpha) for each
     seed in the seeds dictionary.
@@ -481,7 +483,7 @@ def plot(datasets,labels=None,yaxislabel='Conditioning Ratio',xaxislabel='Dimens
             growth_rate = 10**slope-1
             if label is not None:
                 print(label)
-            print('Slope:',slope, '\nIntercept:',intercept,'\nExponential Growth Rate:',growth_rate,end='\n\n')
+            print('Slope:',slope,'\nGrowth Rate:',growth_rate,end='\n\n')
             ax.plot(pos,pos*slope+intercept,c=color)
     if subplots is None:
         ax.yaxis.grid(color='gray',alpha=.15,linewidth=1,which='major')
@@ -505,38 +507,36 @@ def plot(datasets,labels=None,yaxislabel='Conditioning Ratio',xaxislabel='Dimens
         else:
             ax.set_title(title)
     else:  # for subplots ##################################################################
-        for ax_,datasets_axis,title_axis,labels_axis in zip(ax,datasets,title,labels):
-            ax_.yaxis.grid(color='gray',alpha=.15,linewidth=1,which='major')
-            if labels is None:
-                for i,dataset in enumerate(datasets_axis):
-                    plot_dataset(ax_,dataset,f'C{i}')
-            else:
-                for i,dataset in enumerate(datasets_axis):
-                    plot_dataset(ax_,dataset,f'C{i}',labels_axis[i])
-            ax_.set_title('Conditioning Ratios of Quadratic Polynomial Systems')
-            ax_.set_xlabel(xaxislabel)
-            legend_elements = [Patch(facecolor=f'C{i}') for i in range(len(datasets_axis))]
-            ax_.legend(legend_elements,labels_axis)
-            if title is None:
-                ax_.set_title('Conditioning Ratios of Quadratic Polynomial Systems')
-            else:
-                ax_.set_title(title_axis)
-            ax_.set_ylabel(yaxislabel)
-            ax_.yaxis.set_major_formatter(mticker.StrMethodFormatter("$10^{{{x:.0f}}}$"))
-            if min_ylim is not None:
-                ax_.yaxis.set_ticks([np.log10(x) for p in range(min_ylim,max_ylim)
-                                   for x in np.linspace(10**p, 10**(p+1), 10)], minor=True)
+        ax[0].yaxis.grid(color='gray',alpha=.15,linewidth=1,which='major')
+        if labels is None:
+            for i,dataset in enumerate(datasets):
+                plot_dataset(ax[0],dataset,f'C{i}')
+        else:
+            for i,dataset in enumerate(datasets):
+                plot_dataset(ax[0],dataset,f'C{i}',labels[i])
+        ax[0].set_title('Conditioning Ratios of Quadratic Polynomial Systems')
+        ax[0].set_xlabel('Dimension')
+        legend_elements = [Patch(facecolor=f'C{i}') for i in range(len(datasets))]
+        ax[0].legend(legend_elements,labels)
+        if title is None:
+            ax[0].set_title('Conditioning Ratios of Quadratic Polynomial Systems')
+        else:
+            ax[0].set_title(title[0])
         if title is not None: plt.suptitle(title[-1])
         plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+        ax[0].set_ylabel('Conditioning Ratio')
+        ax[0].yaxis.set_major_formatter(mticker.StrMethodFormatter("$10^{{{x:.0f}}}$"))
+        if min_ylim is not None:
+            ax[0].yaxis.set_ticks([np.log10(x) for p in range(min_ylim,max_ylim)
+                               for x in np.linspace(10**p, 10**(p+1), 1)], minor=True)
         # insert slopes subplot stuff here ####################################################
         #######################################################################################
         if _2nd_plot is not None:
             ax[1].clear()
-            ax[1].semilogy(_2nd_plot[0], _2nd_plot[1])
+            ax[1].loglog(_2nd_plot[0], _2nd_plot[1])
             ax[1].set_xlabel(_2nd_plot_axis_labels[0])
             ax[1].set_ylabel(_2nd_plot_axis_labels[1])
             ax[1].set_title(title[1])
-            ax[1].set_xscale('log')
             ax[1].xaxis.set_ticks([x for p in range(-6,-1)
                                for x in np.linspace(10**p, 10**(p+1), 10)],minor=True)
             ax[1].xaxis.set_ticks([10**p for p in range(-6,0)],minor=False)

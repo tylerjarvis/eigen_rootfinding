@@ -978,7 +978,6 @@ def is_power(poly_list, return_string = False):
         else:
             return 'MultiCheb'
     else:
-        print([type(p) == MultiPower for p in poly_list])
         raise ValueError('Bad polynomials in list')
 
 ############################################################################

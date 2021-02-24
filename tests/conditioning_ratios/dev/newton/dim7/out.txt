@@ -1,5 +1,5 @@
-Devestating Example in dimensions [7]
-7
+Devastating Example in dimensions [7]
+Dimension 7
 1 done
 1 saved
 2 done
@@ -62,31 +62,3 @@ Devestating Example in dimensions [7]
 30 saved
 31 done
 31 saved
-32 done
-32 saved
-33 done
-33 saved
-34 done
-34 saved
-35 done
-35 saved
-36 done
-36 saved
-37 done
-37 saved
-38 done
-38 saved
-39 done
-39 saved
-40 done
-40 saved
-41 done
-41 saved
-42 done
-42 saved
-43 done
-43 saved
-44 done
-44 saved
-45 done
-45 saved

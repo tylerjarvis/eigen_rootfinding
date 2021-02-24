@@ -1,1 +1,6 @@
-nohup: ignoring input
+Traceback (most recent call last):
+  File "conditioning_ratios.py", line 543, in <module>
+    coeffs = np.load('random_tests/coeffs/dim{}_deg2_randn.npy'.format(dim))
+  File "/home/yroots/.local/lib/python3.6/site-packages/numpy/lib/npyio.py", line 428, in load
+    fid = open(os_fspath(file), "rb")
+FileNotFoundError: [Errno 2] No such file or directory: 'random_tests/coeffs/dim8_deg2_randn.npy'
