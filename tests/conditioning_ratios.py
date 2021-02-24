@@ -2,7 +2,7 @@
 Computes the conditioning ratios of random quadratics in dimensions
 2-10
 """
-from .devastating_example_test_scripts import *
+from devastating_example_test_scripts import *
 from eigen_rootfinding.utils import condeigs, newton_polish
 from eigen_rootfinding.polyroots import solve
 from eigen_rootfinding.Multiplication import *
@@ -65,8 +65,8 @@ def devastating_conditioning_ratios(dims,eps,kind,newton,method,randcombos=False
     else: shifted = True
     for n,dim in zip(numtests,dims):
         if save:
-            if newton: folder = 'conditioning_ratios/dev/newton/dim{}/'.format(dim)
-            else:      folder = 'conditioning_ratios/dev/nopol/dim{}/'.format(dim)
+            if newton: folder = 'conditioning_ratios/'+method+'/dev/newton/dim{}/'.format(dim)
+            else:      folder = 'conditioning_ratios/'+method+'/dev/nopol/dim{}/'.format(dim)
         if verbose>0:print('Dimension', dim)
         cr = []
         if detailed:
@@ -255,8 +255,8 @@ def get_conditioning_ratios(coeffs, newton, method, randcombos=False, save=True)
     not_full_roots = np.zeros(N,dtype=bool)
     crs = [0]*N
     if save:
-        if newton: folder = 'conditioning_ratios/rand/newton/dim{}/'.format(dim)
-        else:      folder = 'conditioning_ratios/rand/nopol/dim{}/'.format(dim)
+        if newton: folder = 'conditioning_ratios/'+method+'/rand/newton/dim{}/'.format(dim)
+        else:      folder = 'conditioning_ratios/'+method+'/rand/nopol/dim{}/'.format(dim)
     for i,system in enumerate(coeffs):
         polys = [er.MultiPower(c) for c in system]
         cr = conditioningratio(polys,dim,newton,method,randcombos=randcombos)
@@ -528,21 +528,22 @@ if __name__ == "__main__":
     #INPUT FORMAT test_type--dev or rand; newton_polish--newton or nopol; dims-- dimensions to run in
     input = sys.argv[1:]
     test = input[0]
-    if input[1] == 'newton':
+    method = input[1]
+    if input[2] == 'newton':
         newton = True
-    elif input[1] == 'nopol':
+    elif input[2] == 'nopol':
         newton=False
     else:
         raise ValueError("2nd input must be one of 'newton' for polishing or 'nopol' for no polishing")
-    numtests = int(input[2])
-    dims = [int(i) for i in input[3:]]
+    numtests = int(input[3])
+    dims = [int(i) for i in input[4:]]
     if test == 'rand':
         for dim in dims:
             coeffs = np.load('random_tests/coeffs/dim{}_deg2_randn.npy'.format(dim))
-            crs = get_conditioning_ratios(coeffs[:numtests], newton)
+            crs = get_conditioning_ratios(coeffs[:numtests], newton, method)
     elif test == 'dev':
         eps = .1
         kind = 'power'
-        devastating_conditioning_ratios(dims,eps,kind,newton,numtests=numtests,verbose=1)
+        devastating_conditioning_ratios(dims,eps,kind,newton,method,numtests=numtests,verbose=1)
     else:
         raise ValueError("1st input must be one of 'rand' for random polys 'dev' for devastating example")

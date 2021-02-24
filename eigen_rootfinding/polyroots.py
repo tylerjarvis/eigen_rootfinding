@@ -7,7 +7,7 @@ from eigen_rootfinding.utils import match_poly_dimensions, ConditioningError
 
 #todo test and decide what to use as default
 def solve(polys, verbose=False, return_all_roots=True,
-          max_cond_num=1.e6, method='svdmac', randcombos=False,
+          max_cond_num=1.e6, method='qrpfastnull', randcombos=False,
           normal=False,return_mult_matrices=True):
     '''
     Finds the roots of the given list of polynomials.
