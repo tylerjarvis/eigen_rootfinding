@@ -129,9 +129,4 @@ def solve(polys, verbose=False, return_all_roots=True,
             else:
                 return res
         else:
-<<<<<<< HEAD
-            if return_mult_matrices: return res[1:]
-            else: return res[1]
-=======
             raise ValueError('invalid method type for multivariate solver')
->>>>>>> conditioning_ratios

@@ -1413,15 +1413,9 @@ def condeig(A,eig,x,condvec=False):
     """
     n = A.rows
     Q = householder(x)
-<<<<<<< HEAD
     B = (Q.H)*A*Q
     U,R = mp.qr(B[1:,1:]-eig*mp.eye(n-1))
     v = mp_solve_triangular(R,-B[0,1:].H,trans=2)
-=======
-    B = ((Q.conj().T)@A@Q)
-    R = qr(B[1:,1:]-eig*np.eye(n-1),mode='r')[0]
-    v = solve_triangular(R,-B[0,1:].conj(),trans=2)
->>>>>>> conditioning_ratios
     if condvec:
         S = mp.svd(R,compute_uv=False)
         return mp.sqrt(1+mp.norm(v)**2),1/(S[S.rows-1])
