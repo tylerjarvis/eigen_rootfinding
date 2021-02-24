@@ -62,7 +62,7 @@ def svd_nullspace(a,nullity=None, rank=None):
 
 
 def nullspace_solve(polys, return_all_roots=True, method='svd', nullmethod='svd',
-                    randcombos=False, normal=False):
+                    randcombos=False, normal=False, return_mult_matrices=False):
     '''
     Finds the roots of the given list of multidimensional polynomials using
     the nullspace of the Macaulay matrix to create Moller-Stetter matrices.
@@ -119,11 +119,12 @@ def nullspace_solve(polys, return_all_roots=True, method='svd', nullmethod='svd'
     MS = MSfunc(nullspace,matrix_terms,cut,bezout_bound,dim,power=is_power(polys))
     #return roots
     roots = msroots(MS)
-    if return_all_roots:
-        return roots
+    if not return_all_roots:
+        roots = roots[[np.all(np.abs(root) <= 1) for root in roots]]
+    if return_mult_matrices:
+        return roots, MS
     else:
-        # only return roots in the unit complex hyperbox
-        return roots[[np.all(np.abs(root) <= 1) for root in roots]]
+        return roots
 
 
 def get_MS_qrp_nullspace(nullspace,matrix_terms,cut,bezout_bound,dim,power=True):
