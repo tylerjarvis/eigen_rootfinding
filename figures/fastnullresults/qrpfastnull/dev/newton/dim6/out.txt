@@ -1,0 +1,127 @@
+Devastating Example in dimensions [6]
+Dimension 6
+**Potentially converging roots with polishing**
+	Newton changed roots by at most: 1.7669550836093733
+	Dist between root was at least:  0.08405823099340408
+1 done
+1 saved
+**Potentially converging roots with polishing**
+	Newton changed roots by at most: 0.6013197560988374
+	Dist between root was at least:  0.13335916046911664
+2 done
+2 saved
+**Potentially converging roots with polishing**
+	Newton changed roots by at most: 2.1777517437457563
+	Dist between root was at least:  0.13869650380997267
+3 done
+3 saved
+**Potentially converging roots with polishing**
+	Newton changed roots by at most: 0.7591136477138444
+	Dist between root was at least:  0.16406666618179758
+4 done
+4 saved
+**Potentially converging roots with polishing**
+	Newton changed roots by at most: 0.6021453088609462
+	Dist between root was at least:  0.13515873648165055
+5 done
+5 saved
+**Potentially converging roots with polishing**
+	Newton changed roots by at most: 2.628045475964677
+	Dist between root was at least:  0.1508866134999872
+6 done
+6 saved
+**Potentially converging roots with polishing**
+	Newton changed roots by at most: 0.6752109016225932
+	Dist between root was at least:  0.16325640368498343
+7 done
+7 saved
+**Potentially converging roots with polishing**
+	Newton changed roots by at most: 1.8880855305110276
+	Dist between root was at least:  0.14355779774321065
+8 done
+8 saved
+**Potentially converging roots with polishing**
+	Newton changed roots by at most: 0.5602672105882397
+	Dist between root was at least:  0.1322453898445004
+9 done
+9 saved
+**Potentially converging roots with polishing**
+	Newton changed roots by at most: 0.5530391315189075
+	Dist between root was at least:  0.12421610782365355
+10 done
+10 saved
+**Potentially converging roots with polishing**
+	Newton changed roots by at most: 0.6172838552513485
+	Dist between root was at least:  0.1337640926334439
+11 done
+11 saved
+**Potentially converging roots with polishing**
+	Newton changed roots by at most: 0.8882288633970772
+	Dist between root was at least:  0.11412008325137438
+12 done
+12 saved
+**Potentially converging roots with polishing**
+	Newton changed roots by at most: 1.1291494811214695
+	Dist between root was at least:  0.1155984495098228
+13 done
+13 saved
+**Potentially converging roots with polishing**
+	Newton changed roots by at most: 0.6159032241514761
+	Dist between root was at least:  0.11381787145197646
+14 done
+14 saved
+**Potentially converging roots with polishing**
+	Newton changed roots by at most: 0.540800475069897
+	Dist between root was at least:  0.14669443146091382
+15 done
+15 saved
+**Potentially converging roots with polishing**
+	Newton changed roots by at most: 2.0675499667553465
+	Dist between root was at least:  0.14560430391377518
+16 done
+16 saved
+**Potentially converging roots with polishing**
+	Newton changed roots by at most: 0.573969331914019
+	Dist between root was at least:  0.14046154103409542
+17 done
+17 saved
+**Potentially converging roots with polishing**
+	Newton changed roots by at most: 3.739698340561505
+	Dist between root was at least:  0.15023076608271616
+18 done
+18 saved
+**Potentially converging roots with polishing**
+	Newton changed roots by at most: 1.341295764228125
+	Dist between root was at least:  0.15238122174112942
+19 done
+19 saved
+**Potentially converging roots with polishing**
+	Newton changed roots by at most: 0.9285519366379671
+	Dist between root was at least:  0.12848216375997046
+20 done
+20 saved
+**Potentially converging roots with polishing**
+	Newton changed roots by at most: 1.1753191250711654
+	Dist between root was at least:  0.14736889713505946
+21 done
+21 saved
+**Potentially converging roots with polishing**
+	Newton changed roots by at most: 0.4299869684012009
+	Dist between root was at least:  0.12100058098014571
+22 done
+22 saved
+**Potentially converging roots with polishing**
+	Newton changed roots by at most: 0.7307346139372751
+	Dist between root was at least:  0.1275943923140871
+23 done
+23 saved
+**Potentially converging roots with polishing**
+	Newton changed roots by at most: 1.3182229623281732
+	Dist between root was at least:  0.1152465446330583
+24 done
+24 saved
+**Potentially converging roots with polishing**
+	Newton changed roots by at most: 2.93118489373907
+	Dist between root was at least:  0.12060305143152397
+25 done
+25 saved

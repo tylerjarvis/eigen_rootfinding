@@ -1,0 +1,22 @@
+Devastating Example in dimensions [7]
+Dimension 7
+**Potentially converging roots with polishing**
+	Newton changed roots by at most: 0.8306600041632457
+	Dist between root was at least:  0.12368293170831496
+1 done
+1 saved
+**Potentially converging roots with polishing**
+	Newton changed roots by at most: 0.6105645036064504
+	Dist between root was at least:  0.1286116405212862
+2 done
+2 saved
+**Potentially converging roots with polishing**
+	Newton changed roots by at most: 1.7845755015519813
+	Dist between root was at least:  0.1367099421387714
+3 done
+3 saved
+**Potentially converging roots with polishing**
+	Newton changed roots by at most: 1.1137031409438447
+	Dist between root was at least:  0.10851463735035256
+4 done
+4 saved
