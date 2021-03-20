@@ -1,0 +1,24 @@
+nohup: ignoring input
+Traceback (most recent call last):
+  File "conditioning_ratios.py", line 547, in <module>
+    devastating_conditioning_ratios(dims,eps,kind,newton,method,numtests=numtests,verbose=1)
+  File "conditioning_ratios.py", line 81, in devastating_conditioning_ratios
+    conditioning_ratio = conditioningratio(polys,dim,newton,method,randcombos=randcombos,dev=just_dev_root,shifted=shifted,verbose=verbose>1,detailed=detailed)
+  File "conditioning_ratios.py", line 139, in conditioningratio
+    roots,M = solve(polys,max_cond_num=np.inf,verbose=verbose,return_mult_matrices=True,method=method,randcombos=randcombos)
+  File "/home/yroots/eigen_rootfinding/tests/eigen_rootfinding/polyroots.py", line 110, in solve
+    return_mult_matrices=return_mult_matrices)
+  File "/home/yroots/eigen_rootfinding/tests/eigen_rootfinding/Nullspace.py", line 110, in nullspace_solve
+    nullspace,matrix_terms,cut = fast_null(polys,degs)
+  File "/home/yroots/eigen_rootfinding/tests/eigen_rootfinding/Nullspace.py", line 474, in fast_null
+    N,matrix_terms = null_reduce(N,new_shifts,matrix_terms,bigShape,dim,deg,polydegs)
+  File "/home/yroots/eigen_rootfinding/tests/eigen_rootfinding/Nullspace.py", line 420, in null_reduce
+    K = svd_nullspace(X,nullity=nullity)
+  File "/home/yroots/eigen_rootfinding/tests/eigen_rootfinding/Nullspace.py", line 53, in svd_nullspace
+    U,S,Vh = np.linalg.svd(a)
+  File "<__array_function__ internals>", line 6, in svd
+  File "/home/yroots/.local/lib/python3.6/site-packages/numpy/linalg/linalg.py", line 1626, in svd
+    u, s, vh = gufunc(a, signature=signature, extobj=extobj)
+  File "/home/yroots/.local/lib/python3.6/site-packages/numpy/linalg/linalg.py", line 106, in _raise_linalgerror_svd_nonconvergence
+    raise LinAlgError("SVD did not converge")
+numpy.linalg.LinAlgError: SVD did not converge

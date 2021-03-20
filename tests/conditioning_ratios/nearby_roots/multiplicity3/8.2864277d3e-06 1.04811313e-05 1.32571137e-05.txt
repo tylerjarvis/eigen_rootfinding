@@ -1,0 +1,7 @@
+dimensions [4]
+3
+digits precision 100
+Mpmath settings:
+  mp.prec = 336               [default: 53]
+  mp.dps = 100                [default: 15]
+  mp.trap_complex = False     [default: False]
