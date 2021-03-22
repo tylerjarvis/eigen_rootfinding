@@ -425,7 +425,7 @@ def get_almost_high_multiplicity_root_data(alpha,dims,multiplicity=0,seeds={2:ra
     else: return data
 
 def plot(datasets,labels=None,yaxislabel='Conditioning Ratio',xaxislabel='Dimension',subplots=None,title=None,filename='conditioning_ratio_plot',figsize=(6,4),
-         dpi=400,best_fit=True,_2nd_plot=None, min_ylim=None, max_ylim=None,
+         dpi=400,best_fit=True,_2nd_plot=None, min_ylim=None, max_ylim=None,which_legend=0,major_ticks=range(0,24,4),minor_ticks=range(0,24,2),
          _2nd_plot_axis_labels=[r'Standard Deviation of Perturbation','Growth Rate, $r$']):
     """
     Plots conditioning ratio data.
@@ -500,8 +500,8 @@ def plot(datasets,labels=None,yaxislabel='Conditioning Ratio',xaxislabel='Dimens
         ax.set_ylabel(yaxislabel)
         ax.yaxis.set_major_formatter(mticker.StrMethodFormatter("$10^{{{x:.0f}}}$"))
         if min_ylim is not None:
-            ax.yaxis.set_ticks([np.log10(x) for p in range(min_ylim,max_ylim)
-                               for x in np.linspace(10**p, 10**(p+1), 10)], minor=True)
+            ax_.yaxis.set_ticks(major_ticks, minor=False)
+            ax_.yaxis.set_ticks(minor_ticks, minor=True)
         ax.set_xlabel(xaxislabel)
         legend_elements = [Patch(facecolor=f'C{i}') for i in range(len(datasets))]
         ax.legend(legend_elements,labels)
@@ -520,8 +520,6 @@ def plot(datasets,labels=None,yaxislabel='Conditioning Ratio',xaxislabel='Dimens
                     plot_dataset(ax_,dataset,f'C{i}',labels_axis[i])
             ax_.set_title('Conditioning Ratios of Quadratic Polynomial Systems')
             ax_.set_xlabel(xaxislabel)
-            legend_elements = [Patch(facecolor=f'C{i}') for i in range(len(datasets_axis))]
-            ax_.legend(legend_elements,labels_axis)
             if title is None:
                 ax_.set_title('Conditioning Ratios of Quadratic Polynomial Systems')
             else:
@@ -529,8 +527,10 @@ def plot(datasets,labels=None,yaxislabel='Conditioning Ratio',xaxislabel='Dimens
             ax_.set_ylabel(yaxislabel)
             ax_.yaxis.set_major_formatter(mticker.StrMethodFormatter("$10^{{{x:.0f}}}$"))
             if min_ylim is not None:
-                ax_.yaxis.set_ticks([np.log10(x) for p in range(min_ylim,max_ylim)
-                                   for x in np.linspace(10**p, 10**(p+1), 10)], minor=True)
+                ax_.yaxis.set_ticks(major_ticks, minor=False)
+                ax_.yaxis.set_ticks(minor_ticks, minor=True)
+        legend_elements = [Patch(facecolor=f'C{i}') for i in range(len(datasets_axis))]
+        ax[which_legend].legend(legend_elements,labels_axis)
         if title is not None: plt.suptitle(title[-1])
         plt.tight_layout(rect=[0, 0.03, 1, 0.95])
         # insert slopes subplot stuff here ####################################################
