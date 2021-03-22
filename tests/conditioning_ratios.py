@@ -16,6 +16,7 @@ from scipy.stats import linregress
 from matplotlib.patches import Patch
 from matplotlib import ticker
 from matplotlib.ticker import FormatStrFormatter
+from cycler import cycler
 
 macheps = 2.220446049250313e-16
 
@@ -442,6 +443,10 @@ def plot(datasets,labels=None,yaxislabel='Conditioning Ratio',xaxislabel='Dimens
     dpi : int
         dpi of the image
     """
+    #color scheme
+    plt.rcParams['axes.prop_cycle'] = cycler('color', ['#1f77b4', '#ff7f0e', '#d62728',
+                                                       '#9467bd', '#7f7f7f',
+                                                       '#bcbd22', '#17becf'])
     if subplots is None: fig, ax = plt.subplots(nrows=1, ncols=1, figsize=figsize,dpi=dpi)
     #else: fig, ax = plt.subplots(nrows=subplots[0], ncols=subplots[1], figsize=figsize,dpi=dpi,sharey=True,sharex=True)
     else: fig, ax = plt.subplots(nrows=subplots[0], ncols=subplots[1], figsize=figsize,dpi=dpi,sharey=False,sharex=False)

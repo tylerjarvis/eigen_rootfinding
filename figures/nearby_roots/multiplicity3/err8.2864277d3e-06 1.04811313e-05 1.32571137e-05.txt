@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "conditioning_ratios.py", line 565, in <module>
+    alpha = np.float(alpha)
+ValueError: could not convert string to float: '8.2864277d3e-06'
