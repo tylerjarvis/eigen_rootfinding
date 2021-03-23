@@ -357,10 +357,12 @@ def reduce_macaulay_lq(M, cut, bezout_bound, max_cond=1e6):
     # columns, generating a new polynomial basis
     if cut < M.shape[0]:
         Q = qr(M[cut:,cut:].T.conj(),pivoting=True)[0]
-        M[:cut,cut:] = M[:cut,cut:] @ Q # Apply column transform
+        Q2 = Q[:,-bezout_bound:]
+        del Q
+        M[:cut,-bezout_bound:] = M[:cut,cut:] @ Q2 # Apply column transform
 
     # Return the backsolved columns and coefficient matrix for the quotient basis
-    return solve_triangular(M[:cut,:cut],M[:cut,bezout_rank:]),Q[:,-bezout_bound:]
+    return solve_triangular(M[:cut,:cut],M[:cut,bezout_rank:]),Q2
 
 def reduce_macaulay_svd(M, cut, bezout_bound, max_cond=1e6):
     """Reduces the Macaulay matrix using the SVD method.
@@ -409,11 +411,15 @@ def reduce_macaulay_svd(M, cut, bezout_bound, max_cond=1e6):
     # If the matrix is "tall", compute an orthogonal transformation of the remaining
     # columns, generating a new polynomial basis
     if cut < M.shape[0]:
-        Q = svd(M[cut:,cut:])[2].T.conj()
-        M[:cut,cut:] = M[:cut,cut:] @ Q # Apply column transform
+        V = svd(M[cut:,cut:])[2].T.conj()[:,-bezout_bound:]
+        V2 = V[:,-bezout_bound:]
+        del V
+        print(M[:cut,cut:].shape)
+        print(V2.shape)
+        M[:cut,bezout_rank:] = M[:cut,cut:] @ V2# Apply column transform
 
     # Return the backsolved columns and coefficient matrix for the quotient basis
-    return solve_triangular(M[:cut,:cut],M[:cut,bezout_rank:]),Q[:,-bezout_bound:]
+    return solve_triangular(M[:cut,:cut],M[:cut,bezout_rank:]),V2
 
 def reduce_macaulay_qrp(M, cut, bezout_bound, max_cond=1e6):
     """Reduces the Macaulay matrix using the QRP method.
