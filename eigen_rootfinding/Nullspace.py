@@ -103,7 +103,7 @@ def nullspace_solve(polys, return_all_roots=True, method='svd', nullmethod='svd'
         if randcombos:
             C = get_rand_combos_matrix(M.shape[1]-bezout_bound,M.shape[0], normal=normal)
             M = C@M
-        nullspace = svd_nullspace(M,bezout_bound).conj().T
+        nullspace = svd_nullspace(M,bezout_bound).T.conj()
     elif nullmethod=='fast':
         #todo change fast_null to make it
         #  return things in the order we want later
@@ -111,7 +111,7 @@ def nullspace_solve(polys, return_all_roots=True, method='svd', nullmethod='svd'
         srt = np.argsort(matrix_terms.sum(axis=1))[::-1]
         nullspace = nullspace[srt]
         matrix_terms = matrix_terms[srt]
-        nullspace = nullspace.conj().T
+        nullspace = nullspace.T.conj()
     #create MS matrices
     if method=='svd': MSfunc=get_MS_svd_nullspace
     elif method=='lq': MSfunc=get_MS_lq_nullspace
@@ -176,7 +176,7 @@ def get_MS_qrp_nullspace(nullspace,matrix_terms,cut,bezout_bound,dim,power=True)
     neednonbasis = np.concatenate((needhighdeg,needcols[needcols>=cut2]))
     nullspace[:,neednonbasis] = la.solve_triangular(R1,nullspace[:,neednonbasis])
     #construct MS matrices
-    MS = np.empty((bezout_bound, bezout_bound, dim))
+    MS = np.empty((bezout_bound, bezout_bound, dim),dtype=nullspace.dtype)
     for i,arr in enumerate(idx_arrs):
         if power:
             MS[...,i] = nullspace[:,arr]
@@ -222,12 +222,12 @@ def get_MS_lq_nullspace(nullspace,matrix_terms,cut,bezout_bound,dim,power=True):
     nullspace[:,:cut] = la.solve_triangular(L,nullspace[:,:cut],lower=True)
     nullspace[:,cut:] = Q.conj().T
     #construct MS matrices
-    MS = np.empty((bezout_bound, bezout_bound, dim))
+    MS = np.empty((bezout_bound, bezout_bound, dim),dtype=nullspace.dtype)
     lowdeg = slice(cut,None)
     for i in range(dim):
         if power:
             arr = indexarray(matrix_terms,lowdeg,i)
-            MS[...,i] = nullspace[:,arr]@Q
+            MS[...,i] = (nullspace[:,arr]@Q).T
         else:
             arr = indexarray_cheb(matrix_terms,lowdeg,i)
             MS[...,i] = (nullspace[:,arr[0]] + nullspace[:,arr[1]])@Q/2
@@ -271,7 +271,7 @@ def get_MS_svd_nullspace(nullspace,matrix_terms,cut,bezout_bound,dim,power=True)
     nullspace[:,:cut] = (nullspace[:,:cut].T/S).T #transposed for broadcasting
     nullspace[:,cut:] = V.conj().T
     #construct MS matrices
-    MS = np.empty((bezout_bound, bezout_bound, dim))
+    MS = np.empty((bezout_bound, bezout_bound, dim),dtype=nullspace.dtype)
     lowdeg = slice(cut,None)
     for i in range(dim):
         if power:
