@@ -120,8 +120,6 @@ def ms_matrices_cheb(E, Q, matrix_terms, dim):
     A = np.vstack((-E, Q))
     for i in range(dim):
         arr1, arr2 = indexarray_cheb(matrix_terms, slice(m,None), i)
-        print((A[arr1]+A[arr2]).shape)
-        print(Q.T.conj().shape)
         M[..., i] = .5*Q.T.conj()@(A[arr1]+A[arr2])
     return M
 
