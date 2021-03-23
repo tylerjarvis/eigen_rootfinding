@@ -213,9 +213,9 @@ def get_MS_lq_nullspace(nullspace,matrix_terms,cut,bezout_bound,dim,power=True):
         corresponding to multiplication by x_i is MS[..., i]
     '''
     #QRP on low degree columns transposed
-    Q,R,P = la.qr(nullspace[:,cut:].conj().T,pivoting=True)
-    L = R[:bezout_bound].conj().T
-    Q = Q[:,:bezout_bound]
+    Q,R,P = la.qr(nullspace[:,cut:].conj().T,mode='economic',pivoting=True)
+    L = R.conj().T#R[:bezout_bound].conj().T
+    # Q = #Q[:,:bezout_bound]
     #rearrange rows in nullspace
     nullspace = nullspace[P]
     #reduce columns we need for MS matrices
@@ -262,9 +262,9 @@ def get_MS_svd_nullspace(nullspace,matrix_terms,cut,bezout_bound,dim,power=True)
         corresponding to multiplication by x_i is MS[..., i]
     '''
     #SVD on low degree columns
-    U,S,Vh = la.svd(nullspace[:,cut:])
-    V = Vh[:bezout_bound].conj().T
-    S = S[:bezout_bound]
+    U,S,Vh = la.svd(nullspace[:,cut:],full_matrices=False)
+    V = Vh.conj().T#[:bezout_bound].conj().T
+    # S = S[:bezout_bound]
     #reduce columns we need for MS matrices
     #left multiply by U
     nullspace[:,:cut] = U.conj().T@nullspace[:,:cut]
