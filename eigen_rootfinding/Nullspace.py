@@ -103,7 +103,7 @@ def nullspace_solve(polys, return_all_roots=True, method='svd', nullmethod='svd'
         if randcombos:
             C = get_rand_combos_matrix(M.shape[1]-bezout_bound,M.shape[0], normal=normal)
             M = C@M
-        nullspace = svd_nullspace(M,bezout_bound).T.conj()
+        nullspace = svd_nullspace(M,bezout_bound).T
     elif nullmethod=='fast':
         #todo change fast_null to make it
         #  return things in the order we want later
@@ -111,7 +111,7 @@ def nullspace_solve(polys, return_all_roots=True, method='svd', nullmethod='svd'
         srt = np.argsort(matrix_terms.sum(axis=1))[::-1]
         nullspace = nullspace[srt]
         matrix_terms = matrix_terms[srt]
-        nullspace = nullspace.T.conj()
+        nullspace = nullspace.T
     #create MS matrices
     if method=='svd': MSfunc=get_MS_svd_nullspace
     elif method=='lq': MSfunc=get_MS_lq_nullspace
@@ -315,7 +315,6 @@ def all_shifts(polys, matrix_degree):
             shifts[np.sum(mon)+poly.degree].append(tuple([poly,mon]))
     return shifts
 
-#TODO DOCSTRINGS for this
 def new_terms(coeffs, old_term_set):
     """ Gets the new terms for the next iteration of nullspace construction.
 
@@ -401,7 +400,7 @@ def null_reduce(N,shifts,old_matrix_terms,bigShape,dim,deg,polydegs):
         old_matrix_term_indexes.append(row)
 
     #Adds the poly_coeffs to flat_polys, using added_zeros to make sure every term is in there.
-    added_zeros = np.zeros(bigShape)
+    added_zeros = np.zeros(bigShape,dtype=N.dtype)
     new_flat_polys = list()
     old_flat_polys = list()
     for coeff in coeffs:
@@ -409,7 +408,7 @@ def null_reduce(N,shifts,old_matrix_terms,bigShape,dim,deg,polydegs):
         added_zeros[tuple(slices)] = coeff
         new_flat_polys.append(added_zeros[tuple(new_matrix_term_indexes)])
         old_flat_polys.append(added_zeros[tuple(old_matrix_term_indexes)])
-        added_zeros[tuple(slices)] = np.zeros_like(coeff)
+        added_zeros[tuple(slices)] = np.zeros_like(coeff,dtype=coeff.dtype)
 
     R1 = np.reshape(old_flat_polys, (len(old_flat_polys),len(old_matrix_terms)))
     R2 = np.reshape(new_flat_polys, (len(new_flat_polys),len(new_matrix_terms)))
