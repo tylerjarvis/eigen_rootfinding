@@ -87,10 +87,10 @@ def ms_matrices(E, Q, matrix_terms, dim):
     n = Q.shape[1]
     m = E.shape[0]
     M = np.empty((n, n, dim),dtype=E.dtype)
-    A = np.hstack((-E.T.conj(), Q.T.conj()))
+    A = np.vstack((-E, Q))
     for i in range(dim):
         arr = indexarray(matrix_terms, slice(m,None), i)
-        M[..., i] = A[:, arr]@Q
+        M[..., i] = Q.conj().T@A[arr]
     return M
 
 def ms_matrices_cheb(E, Q, matrix_terms, dim):
@@ -117,10 +117,12 @@ def ms_matrices_cheb(E, Q, matrix_terms, dim):
     n = Q.shape[1]
     m = E.shape[0]
     M = np.empty((n, n, dim),dtype=E.dtype)
-    A = np.hstack((-E.T.conj(), Q.T.conj()))
+    A = np.vstack((-E, Q))
     for i in range(dim):
         arr1, arr2 = indexarray_cheb(matrix_terms, slice(m,None), i)
-        M[..., i] = .5*(A[:, arr1]+A[:, arr2])@Q
+        print((A[arr1]+A[arr2]).shape)
+        print(Q.T.conj().shape)
+        M[..., i] = .5*Q.T.conj()@(A[arr1]+A[arr2])
     return M
 
 def ms_matrices_p(E, P, matrix_terms, dim, cut):
@@ -147,10 +149,10 @@ def ms_matrices_p(E, P, matrix_terms, dim, cut):
     r, n = E.shape
     matrix_terms[cut:] = matrix_terms[cut:][P]
     M = np.empty((n, n, dim),dtype=E.dtype)
-    A = np.hstack((-E.T.conj(), np.eye(n)))
+    A = np.vstack((-E, np.eye(n)))
     for i in range(dim):
         arr = indexarray(matrix_terms, slice(r,None), i)
-        M[..., i] = A[:, arr]
+        M[..., i] = A[arr]
     return M
 
 def ms_matrices_p_cheb(E, P, matrix_terms, dim, cut):
@@ -177,10 +179,10 @@ def ms_matrices_p_cheb(E, P, matrix_terms, dim, cut):
     r, n = E.shape
     matrix_terms[cut:] = matrix_terms[cut:][P]
     M = np.empty((n, n, dim),dtype=E.dtype)
-    A = np.hstack((-E.T.conj(), np.eye(n)))
+    A = np.vstack((-E, np.eye(n)))
     for i in range(dim):
         arr1, arr2 = indexarray_cheb(matrix_terms, slice(r,None), i)
-        M[..., i] = .5*(A[:, arr1] + A[:, arr2])
+        M[..., i] = .5*(A[arr1] + A[arr2])
     return M
 
 def sort_eigs(eigs, diag):
