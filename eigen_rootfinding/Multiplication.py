@@ -86,8 +86,8 @@ def ms_matrices(E, Q, matrix_terms, dim):
     """
     n = Q.shape[1]
     m = E.shape[0]
-    M = np.empty((n, n, dim))
-    A = np.hstack((-E.T, Q.T))
+    M = np.empty((n, n, dim),dtype=E.dtype)
+    A = np.hstack((-E.T.conj(), Q.T.conj()))
     for i in range(dim):
         arr = indexarray(matrix_terms, slice(m,None), i)
         M[..., i] = A[:, arr]@Q
@@ -116,7 +116,7 @@ def ms_matrices_cheb(E, Q, matrix_terms, dim):
     """
     n = Q.shape[1]
     m = E.shape[0]
-    M = np.empty((n, n, dim))
+    M = np.empty((n, n, dim),dtype=E.dtype)
     A = np.hstack((-E.T.conj(), Q.T.conj()))
     for i in range(dim):
         arr1, arr2 = indexarray_cheb(matrix_terms, slice(m,None), i)
@@ -146,7 +146,7 @@ def ms_matrices_p(E, P, matrix_terms, dim, cut):
     """
     r, n = E.shape
     matrix_terms[cut:] = matrix_terms[cut:][P]
-    M = np.empty((n, n, dim))
+    M = np.empty((n, n, dim),dtype=E.dtype)
     A = np.hstack((-E.T.conj(), np.eye(n)))
     for i in range(dim):
         arr = indexarray(matrix_terms, slice(r,None), i)
@@ -176,7 +176,7 @@ def ms_matrices_p_cheb(E, P, matrix_terms, dim, cut):
     """
     r, n = E.shape
     matrix_terms[cut:] = matrix_terms[cut:][P]
-    M = np.empty((n, n, dim))
+    M = np.empty((n, n, dim),dtype=E.dtype)
     A = np.hstack((-E.T.conj(), np.eye(n)))
     for i in range(dim):
         arr1, arr2 = indexarray_cheb(matrix_terms, slice(r,None), i)
@@ -293,7 +293,7 @@ def msroots(M):
     U = schur((M*c).sum(axis=-1), output='complex')[1]
 
     for i in range(0, dim):
-        T = (U.conj().T)@(M[..., i])@U
+        T = (U.T.conj())@(M[..., i])@U
         w = eig(M[..., i], right=False)
         arr = sort_eigs(w, np.diag(T))
         eigs[i] = w[arr]

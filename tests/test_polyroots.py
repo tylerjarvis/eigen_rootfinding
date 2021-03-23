@@ -203,3 +203,87 @@ def test_cheb_roots():
     # A = getPoly(1, 2, False)
     # B = getPoly(1, 2, False)
     # correctZeros([A, B])
+
+def test_power_roots_complex():
+    '''
+    The following tests will run polyroots on relatively small random upper trianguler MultiPower.
+    The assert statements will be inside of the correctZeros helper function.
+    '''
+
+    np.random.seed(423)
+
+    #Case 1 - Two MultiPower 2D degree 10 polynomials.
+    A = getPoly(10,2,True,complex=True)
+    B = getPoly(10,2,True,complex=True)
+    correctZeros([A,B])
+
+    #Case 2 - Three MultiPower 3D degree 4 polynomials.
+    A = getPoly(4,3,True,complex=True)
+    B = getPoly(4,3,True,complex=True)
+    C = getPoly(4,3,True,complex=True)
+    correctZeros([A,B,C])
+
+    #Case 3 - Four MultiPower 4D degree 2 polynomials.
+    A = getPoly(2,4,True,complex=True)
+    B = getPoly(2,4,True,complex=True)
+    C = getPoly(2,4,True,complex=True)
+    D = getPoly(2,4,True,complex=True)
+    correctZeros([A,B,C,D])
+
+    #Case 4 - Two MultiPower 2D, one degree 5 and one degree 7
+    A = getPoly(5,2,True,complex=True)
+    B = getPoly(7,2,True,complex=True)
+    correctZeros([A,B])
+
+    #Case 5 - Three MultiPower 3D of degrees 3,4 and 5
+    A = getPoly(3,3,True,complex=True)
+    B = getPoly(4,3,True,complex=True)
+    C = getPoly(5,3,True,complex=True)
+    correctZeros([A,B,C])
+
+    # # Case 6 - Two MultiPower 2D degree 1 polynomials.
+    # A = getPoly(1, 2, True)
+    # B = getPoly(1, 2, True)
+    # correctZeros([A, B])
+
+def test_cheb_roots_complex():
+    '''
+    The following tests will run polyroots on relatively small random upper trianguler MultiCheb.
+    The assert statements will be inside of the correctZeros helper function.
+    '''
+
+    np.random.seed(59)
+
+    #Case 1 - Two MultiCheb 2D degree 10 polynomials.
+    A = getPoly(10,2,False,complex=True)
+    B = getPoly(10,2,False,complex=True)
+    correctZeros([A,B])
+
+    #Case 2 - Three MultiCheb 3D degree 4 polynomials.
+    A = getPoly(4,3,False,complex=True)
+    B = getPoly(4,3,False,complex=True)
+    C = getPoly(4,3,False,complex=True)
+    correctZeros([A,B,C])
+
+    #Case 3 - Four MultiCheb 4D degree 2 polynomials.
+    A = getPoly(2,4,False,complex=True)
+    B = getPoly(2,4,False,complex=True)
+    C = getPoly(2,4,False,complex=True)
+    D = getPoly(2,4,False,complex=True)
+    correctZeros([A,B,C,D])
+
+    #Case 4 - Two MultiCheb 2D, one degree 5 and one degree 7
+    A = getPoly(5,2,False,complex=True)
+    B = getPoly(7,2,False,complex=True)
+    correctZeros([A,B])
+
+    #Case 5 - Three MultiCheb 3D of degrees 3,4 and 5
+    A = getPoly(3,3,False,complex=True)
+    B = getPoly(4,3,False,complex=True)
+    C = getPoly(5,3,False,complex=True)
+    correctZeros([A,B,C])
+
+    # # Case 6 - Two MultiCheb 2D degree 1 polynomials.
+    # A = getPoly(1, 2, False)
+    # B = getPoly(1, 2, False)
+    # correctZeros([A, B])

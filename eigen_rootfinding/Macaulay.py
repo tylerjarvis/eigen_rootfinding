@@ -60,7 +60,6 @@ def macaulay_solve(polys, max_cond_num, verbose=False, return_all_roots=True,
 
     #By Bezout's Theorem. Useful for making sure that the reduced Macaulay Matrix is as we expect
     bezout_bound = np.prod([poly.degree for poly in polys])
-
     matrix, matrix_terms, cut = build_macaulay(polys, verbose)
     if randcombos:
         C = get_rand_combos_matrix(matrix.shape[1]-bezout_bound,matrix.shape[0], normal=normal)
@@ -250,13 +249,13 @@ def create_matrix(poly_coeffs, degree, dim):#, varsToRemove):
         matrix_term_indexes.append(row)
 
     #Adds the poly_coeffs to flat_polys, using added_zeros to make sure every term is in there.
-    added_zeros = np.zeros(bigShape)
+    added_zeros = np.zeros(bigShape,dtype=poly_coeffs[0].dtype)
     flat_polys = list()
     for coeff in poly_coeffs:
         slices = slice_top(coeff.shape)
         added_zeros[slices] = coeff
         flat_polys.append(added_zeros[tuple(matrix_term_indexes)])
-        added_zeros[slices] = np.zeros_like(coeff)
+        added_zeros[slices] = np.zeros_like(coeff,dtype=coeff.dtype)
     del poly_coeffs
 
     #Make the matrix. Reshape is faster than stacking.
@@ -350,14 +349,14 @@ def reduce_macaulay_lq(M, cut, bezout_bound, max_cond=1e6):
 
     # QR reduce the highest-degree columns
     Q,M[:,:cut] = qr(M[:,:cut])
-    M[:,cut:] = Q.T @ M[:,cut:]
+    M[:,cut:] = Q.T.conj() @ M[:,cut:]
     Q = None
     del Q
 
     # If the matrix is "tall", compute an orthogonal transformation of the remaining
     # columns, generating a new polynomial basis
     if cut < M.shape[0]:
-        Q = qr(M[cut:,cut:].T,pivoting=True)[0]
+        Q = qr(M[cut:,cut:].T.conj(),pivoting=True)[0]
         M[:cut,cut:] = M[:cut,cut:] @ Q # Apply column transform
 
     # Return the backsolved columns and coefficient matrix for the quotient basis
@@ -403,14 +402,14 @@ def reduce_macaulay_svd(M, cut, bezout_bound, max_cond=1e6):
 
     # QR reduce the highest-degree columns
     Q,M[:,:cut] = qr(M[:,:cut])
-    M[:,cut:] = Q.T @ M[:,cut:]
+    M[:,cut:] = Q.T.conj() @ M[:,cut:]
     Q = None
     del Q
 
     # If the matrix is "tall", compute an orthogonal transformation of the remaining
     # columns, generating a new polynomial basis
     if cut < M.shape[0]:
-        Q = svd(M[cut:,cut:])[2].conj().T
+        Q = svd(M[cut:,cut:])[2].T.conj()
         M[:cut,cut:] = M[:cut,cut:] @ Q # Apply column transform
 
     # Return the backsolved columns and coefficient matrix for the quotient basis
@@ -455,7 +454,7 @@ def reduce_macaulay_qrp(M, cut, bezout_bound, max_cond=1e6):
 
     # QR reduce the highest-degree columns
     Q,M[:,:cut] = qr(M[:,:cut])
-    M[:,cut:] = Q.T @ M[:,cut:]
+    M[:,cut:] = Q.T.conj() @ M[:,cut:]
     Q = None
     del Q
 
@@ -482,7 +481,7 @@ def reduce_macaulay_p(M, cut, P, bezout_bound, max_cond=1e6):
     cut : int
         Number of columns of max degree
     P : 1d ndarray
-        Predetermined Array of pivots 
+        Predetermined Array of pivots
     bezout_bound : int
             Number of roots of the system, determined by Bezout's theoerm
     max_cond : int or float
@@ -513,7 +512,7 @@ def reduce_macaulay_p(M, cut, P, bezout_bound, max_cond=1e6):
 
     # QR reduce the highest-degree columns
     Q,M[:,:cut] = qr(M[:,:cut])
-    M[:,cut:] = (Q.T @ M[:,cut:])[:,P]
+    M[:,cut:] = (Q.T.conj() @ M[:,cut:])[:,P]
     Q = None
     del Q
 

@@ -1384,7 +1384,7 @@ def condeig(A,eig,x,condvec=False):
     """
     n = A.shape[0]
     Q = householder(x)
-    B = ((Q.conj().T)@A@Q)
+    B = ((Q.T.conj())@A@Q)
     R = qr(B[1:,1:]-eig*np.eye(n-1),mode='r')[0]
     v = solve_triangular(R,-B[0,1:],trans=2)
     if condvec:
