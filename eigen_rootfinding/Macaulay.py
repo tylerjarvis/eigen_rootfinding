@@ -414,8 +414,6 @@ def reduce_macaulay_svd(M, cut, bezout_bound, max_cond=1e6):
         V = svd(M[cut:,cut:])[2].T.conj()[:,-bezout_bound:]
         V2 = V[:,-bezout_bound:]
         del V
-        print(M[:cut,cut:].shape)
-        print(V2.shape)
         M[:cut,bezout_rank:] = M[:cut,cut:] @ V2# Apply column transform
 
     # Return the backsolved columns and coefficient matrix for the quotient basis
