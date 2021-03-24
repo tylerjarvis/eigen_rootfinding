@@ -16,6 +16,10 @@ from scipy.stats import linregress
 from matplotlib.patches import Patch
 from matplotlib import ticker
 from matplotlib.ticker import FormatStrFormatter
+from cycler import cycler
+plt.rcParams['axes.prop_cycle'] = cycler('color', ['#1f77b4', '#ff7f0e', '#d62728',
+                                                   '#9467bd', '#7f7f7f',
+                                                   '#bcbd22', '#17becf'])
 
 macheps = 2.220446049250313e-16
 
