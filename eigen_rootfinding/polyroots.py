@@ -1,13 +1,14 @@
 import numpy as np
 from eigen_rootfinding import OneDimension as oneD
 from eigen_rootfinding.polynomial import is_power
-from eigen_rootfinding.Multiplication import multiplication
+from eigen_rootfinding.Macaulay import macaulay_solve
+from eigen_rootfinding.Nullspace import nullspace_solve
 from eigen_rootfinding.utils import match_poly_dimensions, ConditioningError
 
-
-def solve(polys, MSmatrix=0, eigvals=True, verbose=False,
-          return_all_roots=True, max_cond_num=1.e6,
-          macaulay_zero_tol=1.e-12, method='svd'):
+#todo test and decide what to use as default
+def solve(polys, verbose=False, return_all_roots=True,
+          max_cond_num=1.e6, method='svdmac', randcombos=False,
+          normal=False):
     '''
     Finds the roots of the given list of polynomials.
 
@@ -15,28 +16,39 @@ def solve(polys, MSmatrix=0, eigvals=True, verbose=False,
     ----------
     polys : list of polynomial objects
         Polynomials to find the common roots of.
-    MSmatrix : int
-        Controls which Moller-Stetter matrix is constructed
-        For a univariate polynomial, the options are:
-            0 (default) -- The companion or colleague matrix, rotated 180 degrees
-            1 -- The unrotated companion or colleague matrix
-            -1 -- The inverse of the companion or colleague matrix
-        For a multivariate polynomial, the options are:
-            0 (default) -- The Moller-Stetter matrix of a random polynomial
-            Some positive integer i <= dimension -- The Moller-Stetter matrix of x_i, where variables are index from x1, ..., xn
-            Some negative integer i >= -dimension -- The Moller-Stetter matrix of x_i-inverse
-    eigvals : bool
-        Whether to compute roots of univariate polynomials from eigenvalues (True) or eigenvectors (False).
-        Roots of multivariate polynomials are always comptued from eigenvectors
     verbose : bool
         Prints information about how the roots are computed.
     return_all_roots : bool
         If True returns all the roots, otherwise just the ones in the unit box.
     max_cond_num : float
-        The maximum condition number of the Macaulay Matrix Reduction
-    macaulay_zero_tol : float
-        What is considered 0 in the macaulay matrix reduction.
-
+        The maximum condition number of the Macaulay matrix reduction
+    method : str
+        Which method to use to solve the system. Options are:
+        --1 dimension--
+            'multeigvals':
+                roots are computed as eigenvalues of multiplication matrix
+            'diveigvals':
+                roots are computed as eigenvalues of division matrix
+            'multeigvecs':
+                roots are from as eigenvectors of multiplication matrix
+            'diveigvecs':
+                roots are from as eigenvectors of division matrix
+        --n dimensions--
+            All methods compute roots as eigenvalues of Moller-Stetter (MS) matrices.
+            The methods vary in how the MS matrix is created.
+            'qrpmac','lqmac','svdmac':
+                Via QRP, LQ or SVD of Macaulay matrix
+            'qrpnull','lqnull','svdnull':
+                Via QRP, LQ or SVD of nullspace of Macaulay matrix, which is computed via SVD
+            'qrpfastnull','lqfastnull','svdfastnull': MS
+                Via QRP, LQ or SVD of nullspace of Macaulay matrix, which is computed degree by degree
+    randcombos : bool
+        Whether or not to first take random linear combinations of the Macaulay matrix.
+        Not allowed for fastnullspace reductions
+    normal : bool
+        If randcombos is True, whether or not to use a matrix with entries
+        drawn from the standard normal dsitribution when taking random
+        linear combinations of the Macaulay matrix.
     returns
     -------
     roots : numpy array
@@ -48,6 +60,21 @@ def solve(polys, MSmatrix=0, eigvals=True, verbose=False,
     dim = polys[0].dim
 
     if dim == 1:
+        #default to using rotated companion matrix with eigenvalues
+        if method=='svdmac' or method=='multeigvals': #todo update to final default method
+            MSmatrix = 0
+            eigvals = True
+        elif method=='diveigvals':
+            MSmatrix = -1
+            eigvals = True
+        elif method=='multeigvecs':
+            MSmatrix = 0
+            eigvals = False
+        elif method=='diveigvecs':
+            MSmatrix = -1
+            eigvals = False
+        else:
+            raise ValueError('invalid method type for univariate solver')
         if len(polys) == 1:
             return oneD.solve(polys[0], MSmatrix=MSmatrix, eigvals=eigvals, verbose=verbose)
         else:
@@ -66,9 +93,28 @@ def solve(polys, MSmatrix=0, eigvals=True, verbose=False,
                 zeros = common
             return zeros
     else:
-        res = multiplication(polys, max_cond_num=max_cond_num, verbose=verbose,
-                             return_all_roots=return_all_roots, method=method)
-        if res[0] is None:
-            raise ConditioningError(res[1])
+        if len(polys) != dim:
+            raise ValueError('dimension must match len(polys)')
+        if method in {'qrpnull','lqnull','svdnull',
+                      'qrpfastnull','lqfastnull','svdfastnull'}:
+            if method[-8:]=='fastnull':
+                if randcombos:
+                    #todo verify this is true
+                    raise ValueError('Cannot do random linear combinations and fast nullspace together')
+                return nullspace_solve(polys, return_all_roots=return_all_roots,
+                                   method=method[:-8], nullmethod='fast',
+                                   randcombos=randcombos, normal=normal)
+            else:
+                return nullspace_solve(polys, return_all_roots=return_all_roots,
+                               method=method[:-4], nullmethod='svd',randcombos=randcombos,
+                               normal=normal)
+        elif method in {'qrpmac','lqmac','svdmac'}:
+            res = macaulay_solve(polys, max_cond_num=max_cond_num, verbose=verbose,
+                                 return_all_roots=return_all_roots, method=method[:-3],
+                                 randcombos=randcombos, normal=normal)
+            if res[0] is None:
+                raise ConditioningError(res[1])
+            else:
+                return res
         else:
-            return res
+            raise ValueError('invalid method type for multivariate solver')

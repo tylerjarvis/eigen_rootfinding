@@ -7,7 +7,7 @@ import numpy as np
 from scipy.stats import ortho_group
 from eigen_rootfinding.polynomial import MultiPower, MultiCheb
 from eigen_rootfinding.Multiplication import ms_matrices, ms_matrices_cheb, ms_matrices_p, build_macaulay, multiplication
-from eigen_rootfinding.MacaulayReduce import reduce_macaulay_svd, reduce_macaulay_qrt, reduce_macaulay_tvb, reduce_macaulay_p
+from eigen_rootfinding.Macaulay import reduce_macaulay_svd, reduce_macaulay_qrt, reduce_macaulay_qrp, reduce_macaulay_p
 from eigen_rootfinding.utils import ConditioningError
 import scipy.linalg as la
 import matplotlib.pyplot as plt
@@ -123,7 +123,7 @@ def macaulaypolys(polys):
 def redmacaulayqeps(Q,eps,kind,method,P=None):
     matrix,matrix_terms,cut = macaulayqeps(Q,eps,kind)
     if method == 'qrt': func = reduce_macaulay
-    elif method == 'tvb': func = reduce_macaulay_tvb
+    elif method == 'qrp': func = reduce_macaulay_qrp
     elif method == 'byu': func = reduce_macaulay_byu
     elif method == 'p':
         try:
@@ -140,7 +140,7 @@ def redmacaulayqeps(Q,eps,kind,method,P=None):
 def redmacaulaypolys(polys,method,P=None):
     matrix,matrix_terms,cut = macaulaypolys(polys)
     if method == 'qrt': func = reduce_macaulay
-    elif method == 'tvb': func = reduce_macaulay_tvb
+    elif method == 'qrp': func = reduce_macaulay_qrp
     elif method == 'byu': func = reduce_macaulay_byu
     elif method == 'p':
         try:

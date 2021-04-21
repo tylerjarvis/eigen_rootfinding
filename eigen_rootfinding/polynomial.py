@@ -58,7 +58,7 @@ def chebval2(x, cc): #pragma: no cover
             c1 = tmp + c1*x2
     return c0 + c1*x
 
-def getPoly(deg,dim,power,pcnt_sparse=None,integer=False,maxint=10):
+def getPoly(deg,dim,power,pcnt_sparse=None,integer=False,maxint=10,complex=False):
     '''
     A helper function for testing. Returns a random upper triangular polynomial of the given dimension and degree.
     power is a boolean indicating whether or not the polynomial should be MultiPower.
@@ -68,8 +68,14 @@ def getPoly(deg,dim,power,pcnt_sparse=None,integer=False,maxint=10):
     dimensions = (deg,)*dim
     if integer:
         ACoeff = np.random.randint(0,maxint,size=dimensions)
+        if complex:
+            ACoeff = ACoeff.astype(np.complex128)
+            ACoeff += 1j*np.random.randint(0,maxint,size=dimensions)
     else:
         ACoeff = np.random.randn(*dimensions)
+        if complex:
+            ACoeff = ACoeff.astype(np.complex128)
+            ACoeff += 1j*np.random.randn(*dimensions)
     if pcnt_sparse is not None:
         idx = np.random.choice(np.arange(ACoeff.size),replace=False,size=int(ACoeff.size * pcnt_sparse))
         idx = np.unravel_index(idx,dimensions)
@@ -146,11 +152,11 @@ class Polynomial(object):
             # If coeff has integer coefficients,
             # cast as numpy floats for jit compilation
             if coeff.dtype == np.int32 or coeff.dtype == np.int64:
-                coeff = coeff.astype(np.float64)
-
+                self.coeff = coeff.astype(np.float64)
         elif isinstance(coeff,str):
             self.coeff = makePolyCoeffMatrix(coeff)
         elif isinstance(coeff, tuple):
+            #TODO ask erik what this does
             dim = len(coeff[0])
             deg = coeff[1]
             self.coeff = np.zeros([deg+1 for i in range(dim)])
@@ -388,7 +394,7 @@ class MultiCheb(Polynomial):
         if fold_idx == 0:
             return solution_matrix
 
-        sol = np.zeros_like(solution_matrix) #Matrix of zeroes used to insert the new values..
+        sol = np.zeros_like(solution_matrix,dtype=solution_matrix.dtype) #Matrix of zeroes used to insert the new values..
         slice_0 = slice(None, 1, None) # index to take first slice
         slice_1 = slice(fold_idx, fold_idx+1, None) # index to take slice that contains the axis folding around.
 
@@ -448,8 +454,7 @@ class MultiCheb(Polynomial):
             Coeff that are the result of the one dimensial monomial multiplication.
 
         """
-
-        p1 = np.zeros(initial_matrix.shape + idx)
+        p1 = np.zeros(initial_matrix.shape + idx,dtype=initial_matrix.dtype)
         p1[slice_bottom(initial_matrix)] = initial_matrix
 
         largest_idx = [i-1 for i in initial_matrix.shape]
@@ -471,8 +476,7 @@ class MultiCheb(Polynomial):
                 initial_matrix = MultiCheb._fold_in_i_dir(initial_matrix, number_of_dim, i, shape_of_self[i], idx[i])
         if p1.shape != initial_matrix.shape:
             idx = [i-j for i,j in zip(p1.shape,initial_matrix.shape)]
-
-            result = np.zeros(np.array(initial_matrix.shape) + idx)
+            result = np.zeros(np.array(initial_matrix.shape) + idx,dtype=initial_matrix.dtype)
             result[slice_top(initial_matrix.shape)] = initial_matrix
             initial_matrix = result
         Pf = p1 + initial_matrix
@@ -762,7 +766,7 @@ class MultiPower(Polynomial):
         ndarray if returnType is 'Matrix'
         '''
         mon = np.array(mon)
-        result = np.zeros(self.shape + mon)
+        result = np.zeros(self.shape + mon,dtype=self.coeff.dtype)
         result[slice_bottom(self.coeff)] = self.coeff
         if returnType == 'Poly':
             return MultiPower(result, clean_zeros = False, lead_term = self.lead_term + mon)
@@ -978,7 +982,6 @@ def is_power(poly_list, return_string = False):
         else:
             return 'MultiCheb'
     else:
-        print([type(p) == MultiPower for p in poly_list])
         raise ValueError('Bad polynomials in list')
 
 ############################################################################
@@ -1064,5 +1067,4 @@ def solve(poly1, poly2):
     for i in range(-(rows-1),cols):
         poly_coeffs.append(np.trace(M2, i))
 
-    #print('\n', poly1, poly2, poly_coeffs[::-1])
     return tuple(poly_coeffs[::-1])

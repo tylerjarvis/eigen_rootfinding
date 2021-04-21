@@ -7,9 +7,6 @@ from scipy.special import comb
 class InstabilityWarning(Warning):
     pass
 
-class MacaulayError(np.linalg.LinAlgError):
-    pass
-
 class ConditioningError(Exception):
     """Raised when the conditioning number of a matrix is not
     within the desired tolerance.
@@ -167,7 +164,7 @@ def lcm(a,b):
     -------
     numpy array
         The lcm of the leading terms of a and b. The usual representation is
-        used, i.e., :math:`x^2y^3` is represented as :math:`\mathtt{(2,3)}`
+        used, i.e., :math:`x^2y^3` is represented as :math:`mathtt{(2,3)}`
     '''
     return np.maximum(a.lead_term, b.lead_term)
 
@@ -922,11 +919,11 @@ class Memoize:
 
 def memoize(function):
     cache = {}
-    def decorated_function(*args):
+    def decorated_function(*args, **kwargs):
         if args in cache:
             return cache[args]
         else:
-            val = function(*args)
+            val = function(*args, **kwargs)
             cache[args] = val
             return val
     return decorated_function
@@ -1056,10 +1053,7 @@ def cheb_perturbation3(mult_mon, mons, mon_dict, var):
         list of indexes for the 3rd case of cheb mon mult
     """
     perturb = [0]*len(mon_dict)
-    #print(mons)
     mons_needed = mons[np.where(mons[:,var] < mult_mon[var])]
-    #print(mult_mon)
-    #print(mons_needed)
     for monomial in mons_needed:
         idx = mon_dict[tuple(monomial)]
         diff = tuple(np.abs(np.subtract(monomial,mult_mon)))
@@ -1102,10 +1096,6 @@ def cheb_perturbation2(mult_mon, mons, mon_dict, var):
             perturb[idx2] = idx
         except KeyError as k:
             pass
-
-        #print()
-        #print(mon_dict)
-        #print(perturb)
     return perturb
 
 # def cheb_perturbation1(mult_mon, mons, mon_dict, var):
@@ -1161,7 +1151,6 @@ def all_permutations_cheb(deg,dim,matrixDegree, current_degree = 2):
     '''
     permutations = {}
     mons = mons_ordered(dim,matrixDegree)
-    #print(mons)
     mon_dict = {}
     for i,j in zip(mons[::-1], range(len(mons))):
         mon_dict[tuple(i)] = j
@@ -1182,14 +1171,10 @@ def all_permutations_cheb(deg,dim,matrixDegree, current_degree = 2):
         mons = mons_1D(dim, deg, i)
         mon = [0]*dim
         mon[i] = 1
-        #print(mons)
         for calc in mons:
             diff = tuple(np.subtract(calc, mon))
             if diff in permutations:
                 mon = tuple(mon)
-                #print(num_mons(matrixDegree, dim))
-                #print(calc, calc[i])
-                #print(num_mons(matrixDegree-calc[i], dim))
                 num_in_top = num_mons(matrixDegree, dim) + num_mons(matrixDegree-calc[i]+2, dim)
                 P = permutations[mon][0][permutations[diff][0]]
                 #ptest = cheb_perturbation1(calc, mons2, mon_dict, i)
@@ -1202,8 +1187,6 @@ def all_permutations_cheb(deg,dim,matrixDegree, current_degree = 2):
                 #print(P_inv)
                 #print(calc, " : " , P2)
                 permutations[tuple(calc)] = np.array([P, P_inv, P2])
-    #print(permutations)
-
     return permutations
 
 def mons_1D(dim, deg, var):
